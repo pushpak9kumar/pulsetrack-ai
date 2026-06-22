@@ -5,7 +5,7 @@ const workoutSchema = new mongoose.Schema({
     type: {type: String,required: true},
     duration: {type: Number,required: true},
     calorieBurned: {type: Number},
-    data: {type: Date, default: Date.now }
+    date: {type: Date, default: Date.now }
 }, {timestamps: true});
 
 const Workout = mongoose.model('Workout', workoutSchema);
