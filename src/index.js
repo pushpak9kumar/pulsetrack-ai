@@ -2,10 +2,12 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
+
 const connectMongo = require('./config/mongoConfig');
 const prisma = require('./config/sqlconfig')
 const authRoutes = require('./routes/authRoutes');
 const workoutRoutes = require('./routes/workoutRoutes');
+const aiRoutes = require('./routes/aiRoutes');
 
 const app = express();
 
@@ -14,6 +16,7 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes); // every auth routes /api/auth se start honge
 app.use('/api/workouts', workoutRoutes);
+app.use('/api/ai', aiRoutes);
 
 //basic test routh
 app.get('/', (req,res) => {
