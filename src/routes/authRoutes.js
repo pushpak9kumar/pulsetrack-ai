@@ -8,4 +8,4 @@ router.post('/register', register);
 //POST /api/auth/login - USer login karega
 router.post('/login', login);
 
-module.exports = routes;
+module.exports = router;

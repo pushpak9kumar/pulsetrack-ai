@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const prisma = require('../config/sqlConfig');
 
 //ye middleware check karega ki user logged in hai ya nahi
-const protect = async (req, resizeBy, next) => {
+const protect = async (req, res, next) => {
     try {
         // find token in header
         let token;
@@ -32,7 +32,7 @@ const protect = async (req, resizeBy, next) => {
         next(); //go to next, routh handler
     } catch(error) {
         console.error('Auth middleware error:', error);
-        res.status(401).json({ message: 'Not authorized token failed'});
+        res.status(401).json({ message: 'Not authorized ,Token failed'});
     }
 };
 
