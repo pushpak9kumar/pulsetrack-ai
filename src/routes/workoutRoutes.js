@@ -3,17 +3,17 @@ const router = express.Router();
 const { protect } = require('../middleware/authMiddleware');
 const {
     createWorkout,
-    getworkouts,
-    getworkoutById,
-    updateworkout,
+    getWorkouts,
+    getWorkoutById,
+    updateWorkout,
     deleteWorkout
 } = require('../controllers/workoutController');
 
 //all workout routes are protected, hence login is required
-router.post('/', protect, createworkout);
+router.post('/', protect, createWorkout);
 router.get('/', protect, getWorkouts);
 router.get('/:id', protect, getWorkoutById);
-router.put('/:id', protect, updateworkout);
+router.put('/:id', protect, updateWorkout);
 router.delete('/:id', protect, deleteWorkout);
 
 module.exports = router;

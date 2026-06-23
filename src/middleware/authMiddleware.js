@@ -8,7 +8,7 @@ const protect = async (req, res, next) => {
         let token;
 
         //Authorization header me "Bearer <token> format me token aata hai"
-        if(req.headers.authorization && req.headers.authorization.startWith('Bearer')){
+        if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
             token = req.headers.authorization.split(' ')[1];// part after the bearer part
         }
 
@@ -24,12 +24,14 @@ const protect = async (req, res, next) => {
         });
 
         if(!user){
-            return res.status(401).json({ message: 'User not foound'});
+            return res.status(401).json({ message: 'User not found' });
         }
 
         //attach user to the request so that other routes use it
         req.user = user;
+
         next(); //go to next, routh handler
+        
     } catch(error) {
         console.error('Auth middleware error:', error);
         res.status(401).json({ message: 'Not authorized ,Token failed'});

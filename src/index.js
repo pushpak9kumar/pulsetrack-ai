@@ -5,7 +5,7 @@ require('dotenv').config();
 const connectMongo = require('./config/mongoConfig');
 const prisma = require('./config/sqlconfig')
 const authRoutes = require('./routes/authRoutes');
-const workoutRoutes = require('../routes/workoutRoutes');
+const workoutRoutes = require('./routes/workoutRoutes');
 
 const app = express();
 
