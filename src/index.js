@@ -5,6 +5,7 @@ require('dotenv').config();
 const connectMongo = require('./config/mongoConfig');
 const prisma = require('./config/sqlconfig')
 const authRoutes = require('./routes/authRoutes');
+const workoutRoutes = require('../routes/workoutRoutes');
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api/auth', authRoutes); // every auth routes /api/auth se start honge
+app.use('/api/workouts', workoutRoutes);
 
 //basic test routh
 app.get('/', (req,res) => {
