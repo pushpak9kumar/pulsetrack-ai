@@ -1,0 +1,131 @@
+const Workout = require('../models/Workout');
+
+//=======================Create Workout=======================
+const createWorkout = async (req, res) => {
+    try {
+        const { type, duration, calorieBurned } = req.body;
+
+        //Validation
+        if(!type || !duration) {
+            return res.status(400).json({message: 'Please provide type and duration'});
+        }
+
+        //Always take userId from req.user not from req.body, otherwise any hacker will make any workout for any other user
+        const newWorkout = await Workout.create({
+            userID: req.user.id,
+            typee,
+            duration,
+            calorieBurned,
+            date: req.body.date || Date.now()
+        });
+
+        res.staus(201).json({
+            message: 'workout logged successfully',
+            workout : newWorkout
+        });
+    } catch(error) {
+        console.error('Create workout error:', error);
+        res.status(500).json({message: 'Server error', error: error.message });
+    }
+};
+
+//==========================GET all Workout(for logged in users only) ====================
+const getWorkouts = async (req, res) => {
+    try {
+        //finding only those workout in database whose userId matches with current ID
+        const workouts = await workout.find({ userId: req.user.id }).sort({ date: -1});// des order
+
+        res.json({
+            count: workouts.length,
+            workouts
+        });
+
+    } catch (error) {
+        console.error('Get workouts error:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+
+};
+
+//========================= Get single workout===========
+const getWorkoutById = async (req, res) => {
+    try {
+        const workout = await Workout.findById(req.params.id);
+
+        if(!workout) {
+            return res.status(404).json({ message: 'Workout not found' });
+        }
+
+        //Security check
+        if(workout.userId.toString() !== req.user.id) {
+            return res.status(401).json({ message: 'Not authorized to view this workout' });
+        }
+
+        res.json(workout);
+    } catch(error) {
+        console.error('Geet workout by ID error:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+//========================== Update Workout =============
+const updateworkout = async(req, res) => {
+    try {
+        const workout = await Workout.findByIdAndUpdate(req.params.id);
+
+        if(!workout) {
+            return res.status(404).json({ message: 'workout not found' });
+        }
+
+        //Security check
+        if(workout.userId.toString() !== req.user.id) {
+            return res.status(401).json({ message: 'Not authorized to update this workout '});
+        }
+
+        //Update 
+        const updatedWorkout = await workout.findByIdAndUpdate(
+            req.params.id,
+            req.body,// jo bhi naya datahai bodyme aaya hai
+            { new: true, runValidators: true }// new: true, means updated data wapsa do 
+        );
+
+        res.josn({
+            message: 'Workout updtaed successfully',
+            workout: updatedworkout
+        });
+    } catch (error) {
+        console.error('Update workout error:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+// =============================Delete Workout ============================
+const deleteWorkout = async (req, res) => {
+    try {
+        const workout = await Workout.findById(req.params.id);
+
+        if(!workout) {
+            return res.status(404).json({ message: 'Workout not found'});
+        }
+
+        //Security
+        if(workout.userId.toString() !== req.user.id) {
+            return res.status(401).json({ message: 'Not authorized to delete this workout' });
+        }
+
+        await workout.findByIdAndDelete(req.params.id);
+
+        res.json({ message: 'workout deleted successfully '});
+    }catch (error) {
+        console.error('Deleteworkout error:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    };
+    
+}
+    module.exports = {
+        createWorkout,
+        getWorkouts,
+        getWorkoutById,
+        updateworkout,
+        deleteWorkout
+    };
