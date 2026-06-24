@@ -1,4 +1,5 @@
 const Workout = require('../models/Workout');
+const { calculateXP, calculateLevel } = require('../service/xpService');
 //===========================create workout ===========
 const createWorkout = async (req, res) => {
     try {
@@ -24,10 +25,41 @@ const createWorkout = async (req, res) => {
 
         // Database me save karna
         const newWorkout = await Workout.create(workoutData);
+        
+        //calculating xp
+        const earnedXP = calculateXP(duration, calorieBurned);
+        //fetching user current XP
+        const currentUser = await prisma.user.findUnique({
+            where: { id: req.user.id }
+        });
+
+        const newTotalXP = currentUser.xp + earnedXP;
+
+        //calculating level
+        const levelInfo = calculateLevel(newTotalXP);
+
+        //update user
+        const updatedUser= await prisma.user.update({
+            where: { id: req.user.id },
+            data: {
+                xp: newTotalXP,
+                level: levelInfo.level
+            }
+        });
 
         res.status(201).json({
             message: 'Workout logged successfully',
-            workout: newWorkout
+            workout: newWorkout,
+            xpEarned: earnedXP,
+            userStats: {
+                totalXP: newTotalXP,
+                workout: newWorkout,
+                xpEarned: {
+                    totalXP: newTotalXP,
+                    level: levelInfo.level,
+                    xpToNextLevel: levelInfo.xpToNextLevel
+                }
+            }
         });
 
     } catch (error) {
