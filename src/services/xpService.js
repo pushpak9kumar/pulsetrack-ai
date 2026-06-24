@@ -13,7 +13,7 @@ const calculateLevel = (totalXP) => {
     let xpNeeded = 1000;
     let curentLevelXP = 0;
 
-    while(totalXp >= xpNeeded) {
+    while(totalXP >= xpNeeded) {
         level++;
         currentLevelXP = xpNeeded;
         xpNeeded += level * 1000;

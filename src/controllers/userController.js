@@ -1,5 +1,5 @@
 const prisma = require('../config/sqlConfig');
-const { calculateLevel } = require('../service/xpService');
+const { calculateLevel } = require('../services/xpService');
 
 //function to see user progress
 const getUserStats = async ( req, res) => {
