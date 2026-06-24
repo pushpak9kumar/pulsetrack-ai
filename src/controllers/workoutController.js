@@ -1,5 +1,5 @@
 const Workout = require('../models/Workout');
-const { calculateXP, calculateLevel } = require('../service/xpService');
+const { calculateXP, calculateLevel } = require('../services/xpService');
 //===========================create workout ===========
 const createWorkout = async (req, res) => {
     try {
@@ -17,11 +17,6 @@ const createWorkout = async (req, res) => {
             calorieBurned,
             date: req.body.date || Date.now()
         };
-
-        // 🔍 YE DEBUG LINE ZAROOR DEKHNA
-        console.log("=== DEBUG: DATA BEING SAVED ===");
-        console.log(workoutData);
-        console.log("================================");
 
         // Database me save karna
         const newWorkout = await Workout.create(workoutData);
@@ -47,20 +42,16 @@ const createWorkout = async (req, res) => {
             }
         });
 
-        res.status(201).json({
-            message: 'Workout logged successfully',
-            workout: newWorkout,
-            xpEarned: earnedXP,
-            userStats: {
-                totalXP: newTotalXP,
-                workout: newWorkout,
-                xpEarned: {
-                    totalXP: newTotalXP,
-                    level: levelInfo.level,
-                    xpToNextLevel: levelInfo.xpToNextLevel
-                }
-            }
-        });
+       res.status(201).json({
+    message: 'Workout logged successfully',
+    workout: newWorkout,
+    xpEarned: earnedXP,
+    userStats: {
+        totalXP: newTotalXP,
+        level: levelInfo.level,
+        xpToNextLevel: levelInfo.xpToNextLevel
+    }
+});
 
     } catch (error) {
         console.error('Create workout error:', error);

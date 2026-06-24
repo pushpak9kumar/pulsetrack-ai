@@ -9,14 +9,14 @@ const getAICoachFeedback = async (req, res) => {
 
         //Agar workout diya hai, toh us workout ka data fetch karo
         if(workoutId) {
-            const workout = await Workout.findById(workotId);
+            const workout = await Workout.findById(workoutId);
 
             if(!workout) {
                 return res.status(404).json({ message: 'Workout not found' });
             }
 
             //Security check: kya ye workout isi user ka hai
-            if(workout.userId.toString() !== req.user.id) {
+            if(workout.userId.toString() !== String(req.user.id)) {
                 return res.status(401).json({ message: 'Not authorized' });
             }
 
@@ -43,7 +43,7 @@ const getAICoachFeedback = async (req, res) => {
         }
 
         //if workoutId was not there,then take custom workout data
-        const { tupe, duration, calorieBurned } = req.body;
+        const { type, duration, calorieBurned } = req.body;
 
         if(!type || !duration) {
             return res.status(400).json({
@@ -67,7 +67,7 @@ const getAICoachFeedback = async (req, res) => {
 
         res.json({
             message: 'AI Coach feedback generated',
-            aiFeedback: AuthenticatorAttestationResponse.feedback
+            aiFeedback: aiResponse.feedback
         });
     } catch (error) {
         console.error('AI Coach error:', error);
