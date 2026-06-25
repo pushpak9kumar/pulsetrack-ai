@@ -1,3 +1,4 @@
+import { createContext, useState, useEffect, useContext } from 'react';
 //Context banao(global state container)
 const AuthContext = createContext();
 
@@ -17,12 +18,12 @@ export const AuthProvider = ({ children }) => {
             setToken(storedToken);
             setUser(JSON.parse(storedUser));
         }
-        setLoading(false); //LOading khatam
+        setLoading(false); //Loading khatam
     }, []);
 
     //Login function(backend se token aaya toh call hoga)
     const login = (userData, tokenValue) => {
-        setUser(useData);
+        setUser(userData);
         setToken(tokenValue);
         localStorage.setItem('token', tokenValue);
         localStorage.setItem('user', JSON.stringify(userData));
@@ -31,7 +32,6 @@ export const AuthProvider = ({ children }) => {
     //Logout function
     const logout = () => {
         setUser(null);
-        setToken(null);
         setToken('');
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -41,7 +41,8 @@ export const AuthProvider = ({ children }) => {
     return (
         <AuthContext.Provider value={{
             user,
-            token,login,
+            token,
+            login,
             logout,
             loading,
             isAuthenticated: !!user //Boolean - logged in or not
