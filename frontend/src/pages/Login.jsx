@@ -1,51 +1,45 @@
 import { useState } from 'react';
-import{ useNavigate, Link } from 'react-router-dom';
-import{ useAuth } from '../context/Authcontext';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 
 const Login = () => {
-
-    const [formData, setFormData] = useState({
-        email: '',
-        password:''
-    });
-
-    formData = {
-        email: 'user@example.com', // user to type karega
-        password: 'secret123'
-    };
-
+    // 1. State variables (const se banaye hain, isliye inko direct change nahi kar sakte)
+    const [formData, setFormData] = useState({ email: '', password: '' });
     const [loading, setLoading] = useState(false);
-
+    
     const { login } = useAuth();
     const navigate = useNavigate();
 
+    // 2. Input change handler
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    // 3. Form submit handler
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
-         
+        
+        setLoading(true); 
+
         try {
-            const response = await api.post('/auth/login', formDta);
-            const { token, user} = response.data;
-
-             login(user, token);
-             toast.success('Login successful ');
-             navigate('/dashboard');
-
-       } catch(error) {
-        const message = error.response?.data?.message || 'Login failed';
-        toast.error(message);
-       } finally {
-        setLoading(false);
-       }
+            const response = await api.post('/auth/login', formData);
+            const { token, user } = response.data;
+            
+            login(user, token);
+            toast.success('Login successful! 🎉');
+            navigate('/dashboard');
+            
+        } catch (error) {
+            const message = error.response?.data?.message || 'Login failed';
+            toast.error(message);
+        } finally {
+            setLoading(false);
+        }
     };
 
-     return (
+    return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
             <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
                 <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
