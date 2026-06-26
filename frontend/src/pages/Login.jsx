@@ -5,23 +5,19 @@ import api from '../services/api';
 import toast from 'react-hot-toast';
 
 const Login = () => {
-    // 1. State variables (const se banaye hain, isliye inko direct change nahi kar sakte)
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [loading, setLoading] = useState(false);
     
     const { login } = useAuth();
     const navigate = useNavigate();
 
-    // 2. Input change handler
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    // 3. Form submit handler
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        setLoading(true); 
+        setLoading(true);
 
         try {
             const response = await api.post('/auth/login', formData);
@@ -32,8 +28,17 @@ const Login = () => {
             navigate('/dashboard');
             
         } catch (error) {
-            const message = error.response?.data?.message || 'Login failed';
+            // ✅ Better error handling
+            console.error('Login error:', error);
+            
+            const message = error.response?.data?.message || 
+                           error.response?.data?.error ||
+                           'Invalid email or password. Please try again.';
+            
             toast.error(message);
+            
+            // Form clear mat karo - user ko apna data dikhna chahiye
+            // setFormData({ email: '', password: '' });
         } finally {
             setLoading(false);
         }
