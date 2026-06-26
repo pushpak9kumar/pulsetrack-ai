@@ -1,5 +1,7 @@
 import { useAuth } from '../context/AuthContext';
+import {Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+
 
 const Dashboard = () => {
     const { user } = useAuth();
@@ -27,6 +29,13 @@ const Dashboard = () => {
                         <h3 className="text-gray-600 text-sm">Workouts</h3>
                         <p className="text-3xl font-bold text-purple-600">0</p>
                     </div>
+                </div>
+                 <div className="flex justify-center">
+                    <Link 
+                        to="/log-workout" 
+                        className="bg-gradient-to-r from-green-500 to-blue-600 text-white px-8 py-4 rounded-xl text-xl font-bold hover:shadow-2xl transition transform hover:scale-105">
+                        + Log New Workout
+                    </Link>
                 </div>
             </div>
         </div>

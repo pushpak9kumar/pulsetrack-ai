@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import LogWorkout from './pages/LogWorkout';
 
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -27,6 +28,13 @@ function App() {
                             <Dashboard />
                         </ProtectedRoute>
                     } />
+
+                      <Route path="/log-workout" element={
+                        <ProtectedRoute>
+                            <LogWorkout />
+                        </ProtectedRoute>
+                    } />
+                    
                 </Routes>
             </Router>
         </AuthProvider>
