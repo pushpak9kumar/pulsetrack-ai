@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const prisma = require('../config/sqlConfig');
 
+
 //ye middleware check karega ki user logged in hai ya nahi
 const protect = async (req, res, next) => {
     try {

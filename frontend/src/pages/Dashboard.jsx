@@ -13,6 +13,15 @@ const Dashboard = () => {
     const [workouts, setWorkouts] = useState([]);
     const [loadingWorkouts, setLoadingWorkouts] = useState(true);
 
+    // GOAL STATES 
+    const [userGoal, setUserGoal] = useState({ 
+        targetValue: 100, 
+        currentValue: 0, 
+        title: "Weekly Goal" 
+    });
+    const [goalInput, setGoalInput] = useState(100);
+
+
     // 2. DATA FETCHING FUNCTION (Reusable banaya)
     const fetchWorkouts = async () => {
         try {
@@ -34,6 +43,16 @@ const Dashboard = () => {
             setWorkouts([]);
         } finally {
             setLoadingWorkouts(false);
+        }
+    };
+  // fetch goal fumction
+     const fetchUserGoal = async () => {
+        try {
+            const response = await api.get('/users/goal');
+            setUserGoal(response.data);
+            setGoalInput(response.data.targetValue);
+        } catch (error) {
+            console.error("Failed to fetch goal:", error);
         }
     };
 
@@ -67,8 +86,23 @@ const Dashboard = () => {
         toast.error(error.response?.data?.message || 'Failed to delete workout');
     }
 };
+ 
+// GOAL UPDATE FUNCTION 
+    const handleGoalUpdate = async (e) => {
+        e.preventDefault();
+        try {
+            await api.put('/users/goal', { targetValue: goalInput });
+            setUserGoal({ ...userGoal, targetValue: Number(goalInput) });
+            toast.success('Weekly goal updated! 🎯');
+        } catch (error) {
+            toast.error('Failed to update goal');
+        }
+    };
 
-    // 6. CALCULATE TOTAL XP (1 Workout = 10 XP)
+
+    // 6. CALCULATIONS , (1 Workout = 10 XP)
+    const totalMinutes = workouts.reduce((sum, w) => sum + Number(w.duration), 0);
+    const progressPercentage = Math.min((totalMinutes / userGoal.targetValue) * 100, 100);
     const totalXP = workouts.length * 10;
     const level = Math.floor(totalXP / 100) + 1;
 
@@ -99,6 +133,38 @@ const Dashboard = () => {
                         <h3 className="text-gray-600 text-sm">Total Workouts</h3>
                         <p className="text-3xl font-bold text-purple-600">{workouts.length}</p>
                     </div>
+                </div>
+                
+                 {/* GOAL & PROGRESS BAR SECTION */}
+                <div className="bg-white p-6 rounded-xl shadow-md mb-10">
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-xl font-bold text-gray-800">Weekly Goal Progress 🎯</h2>
+                        <span className="text-sm font-semibold text-blue-600">
+                            {totalMinutes} / {userGoal.targetValue} mins
+                        </span>
+                    </div>
+                    
+                    {/* Progress Bar */}
+                    <div className="w-full bg-gray-200 rounded-full h-4 mb-4">
+                        <div 
+                            className="bg-gradient-to-r from-blue-500 to-green-500 h-4 rounded-full transition-all duration-500 ease-out"
+                            style={{ width: `${progressPercentage}%` }}
+                        ></div>
+                    </div>
+
+                    {/* Goal Update Form */}
+                    <form onSubmit={handleGoalUpdate} className="flex gap-2 items-center">
+                        <label className="text-sm text-gray-600">Set new goal (mins):</label>
+                        <input 
+                            type="number" 
+                            value={goalInput}
+                            onChange={(e) => setGoalInput(e.target.value)}
+                            className="border border-gray-300 rounded px-2 py-1 w-24 text-sm"
+                        />
+                        <button type="submit" className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 transition">
+                            Update
+                        </button>
+                    </form>
                 </div>
 
                 {/* Workouts List Section */}
