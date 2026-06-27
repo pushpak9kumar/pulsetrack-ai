@@ -4,7 +4,7 @@ import { Link, useLocation } from 'react-router-dom'; // ✅ useLocation import 
 import Navbar from '../components/Navbar';
 import api from '../services/api';
 import toast from 'react-hot-toast'; // ✅ Toast import kiya
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line } from 'recharts';
 const Dashboard = () => {
     const { user } = useAuth();
     const location = useLocation(); // ✅ Ye track karega ki user kahan se aaya
@@ -26,6 +26,12 @@ const Dashboard = () => {
     const [aiFeedback, setAiFeedback] = useState('');
     const [loadingAI, setLoadingAI] = useState(false);
     const [showAIModal, setShowAIModal] = useState(false);
+
+    //States for BMI 
+    const [weightInput, setWeightInput ] = useState('');
+    const [heightInput, setHeightInput ] = useState('');
+    const [weightHistory, setWeightHistory] = useState([]);
+    const [currentBmi, setCurrentBmi] = useState(null);
 
 
     // 2. DATA FETCHING FUNCTION (Reusable banaya)
@@ -127,6 +133,25 @@ const Dashboard = () => {
         return Object.values(activityMap);
     };
 
+    //Submit weight and height
+        const handleWeightSubmit = async (e) => {
+        e.preventDefault();
+        if (!weightInput || !heightInput) return;
+
+        try {
+            const response = await api.post('/weight/log', {
+                weight: weightInput,
+                heightCm: heightInput
+            });
+            setCurrentBmi(response.data.currentBmi);
+            setWeightHistory(response.data.history);
+            setWeightInput(''); // Form clear karo
+            toast.success('Weight logged! 📉');
+        } catch (error) {
+            toast.error('Failed to log weight');
+        }
+    };
+
     // ✅ BAR CHART DATA
     const getWeeklyActivity = () => {
         const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -181,6 +206,8 @@ const Dashboard = () => {
         }
         return streak;
     };
+
+
  
 // GOAL UPDATE FUNCTION 
     const handleGoalUpdate = async (e) => {
@@ -320,7 +347,7 @@ const Dashboard = () => {
                     </form>
                 </div>
 
-                                {/* ✅ CHARTS SECTION (Donut & Bar Chart) */}
+                    {/* ✅ CHARTS SECTION (Donut & Bar Chart) */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
                     
                     {/* Donut Chart - Activity Distribution */}
@@ -398,6 +425,79 @@ const Dashboard = () => {
                                 </BarChart>
                             </ResponsiveContainer>
                         )}
+                    </div>
+                </div>
+
+                                {/* ✅ BODY METRICS & BMI SECTION */}
+                <div className="bg-white p-6 rounded-xl shadow-md mb-10">
+                    <h2 className="text-xl font-bold text-gray-800 mb-4">Body Metrics & BMI 📉</h2>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {/* Form */}
+                        <div>
+                            <form onSubmit={handleWeightSubmit} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Height (cm)</label>
+                                    <input 
+                                        type="number" 
+                                        value={heightInput}
+                                        onChange={(e) => setHeightInput(e.target.value)}
+                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border"
+                                        placeholder="e.g., 175"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Current Weight (kg)</label>
+                                    <input 
+                                        type="number" 
+                                        value={weightInput}
+                                        onChange={(e) => setWeightInput(e.target.value)}
+                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border"
+                                        placeholder="e.g., 70"
+                                    />
+                                </div>
+                                <button type="submit" className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition">
+                                    Log Weight
+                                </button>
+                            </form>
+                            {currentBmi && (
+                                <div className="mt-4 p-4 bg-blue-50 rounded-lg text-center">
+                                    <p className="text-sm text-gray-600">Your Current BMI</p>
+                                    <p className="text-2xl font-bold text-blue-600">{currentBmi}</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Line Chart */}
+                        <div className="h-64">
+                            {weightHistory.length === 0 ? (
+                                <div className="flex items-center justify-center h-full text-gray-500">
+                                    Log weight to see progress graph
+                                </div>
+                            ) : (
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <LineChart data={weightHistory}>
+                                        <CartesianGrid strokeDasharray="3 3" />
+                                        <XAxis 
+                                            dataKey="createdAt" 
+                                            tickFormatter={(str) => new Date(str).toLocaleDateString()} 
+                                        />
+                                        <YAxis domain={['dataMin - 2', 'dataMax + 2']} />
+                                        <Tooltip 
+                                            labelFormatter={(str) => new Date(str).toLocaleDateString()}
+                                            formatter={(value) => [`${value} kg`, 'Weight']}
+                                        />
+                                        <Line 
+                                            type="monotone" 
+                                            dataKey="weight" 
+                                            stroke="#8B5CF6" 
+                                            strokeWidth={3}
+                                            dot={{ r: 5, fill: '#8B5CF6' }}
+                                        />
+                                    </LineChart>
+                                </ResponsiveContainer>
+                            )}
+                        </div>
                     </div>
                 </div>
 

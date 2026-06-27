@@ -9,6 +9,7 @@ const authRoutes = require('./routes/authRoutes');
 const workoutRoutes = require('./routes/workoutRoutes');
 const aiRoutes = require('./routes/aiRoutes');
 const userRoutes = require('./routes/userRoutes');
+const weightHeightRoutes = require('./routes/weightHeightRoutes');
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use('/api/auth', authRoutes); // every auth routes /api/auth se start honge
 app.use('/api/workouts', workoutRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/weight', weightHeightRoutes);
 
 //basic test routh
 app.get('/', (req,res) => {
