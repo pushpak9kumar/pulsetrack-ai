@@ -102,11 +102,11 @@ const Dashboard = () => {
     }
 };
 
-    // ✅ CHARTS COLORS
+    // CHARTS COLORS
     const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
 
-    // ✅ PIE CHART DATA
-       // ✅ PIE CHART DATA (Fixed Version)
+    //  PIE CHART DATA
+       
     const getActivityDistribution = () => {
         const activityMap = {};
         
@@ -145,6 +145,41 @@ const Dashboard = () => {
             }
         });
         return weekData;
+    };
+
+        // ✅ STREAK CALCULATOR LOGIC
+    const calculateStreak = (workouts) => {
+        if (workouts.length === 0) return 0;
+
+        // 1. Saari dates ko 'Start of Day' me convert karo (Time ko ignore karne ke liye)
+        const dates = workouts.map(w => {
+            const d = new Date(w.createdAt);
+            d.setHours(0, 0, 0, 0);
+            return d.getTime();
+        });
+
+        // 2. Duplicate dates hatao aur Newest se Oldest sort karo
+        const uniqueDates = [...new Set(dates)].sort((a, b) => b - a);
+
+        // 3. Check karo ki latest workout aaj ya kal (yesterday) ka hai ya nahi
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        if (uniqueDates[0] < today.getTime() - 86400000) {
+            return 0; // Agar sabse naya workout bhi 1 din purana hai, toh streak toot gaya
+        }
+
+        // 4. Consecutive days count karo
+        let streak = 0;
+        let expectedDate = uniqueDates[0];
+
+        for (let i = 0; i < uniqueDates.length; i++) {
+            if (uniqueDates[i] === expectedDate) {
+                streak++;
+                expectedDate -= 86400000; // Agla expected date pichla din hoga
+            } else if (uniqueDates[i] < expectedDate) {
+                break; // Gap mil gaya, loop tod do
+            }
+        }
+        return streak;
     };
  
 // GOAL UPDATE FUNCTION 
@@ -228,6 +263,28 @@ const Dashboard = () => {
                     <div className="bg-white p-6 rounded-xl shadow-md">
                         <h3 className="text-gray-600 text-sm">Total Workouts</h3>
                         <p className="text-3xl font-bold text-purple-600">{workouts.length}</p>
+                    </div>
+                </div>
+
+                                {/* Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+                    <div className="bg-white p-6 rounded-xl shadow-md">
+                        <h3 className="text-gray-600 text-sm">Level</h3>
+                        <p className="text-3xl font-bold text-blue-600">{level}</p>
+                    </div>
+                    <div className="bg-white p-6 rounded-xl shadow-md">
+                        <h3 className="text-gray-600 text-sm">Total XP</h3>
+                        <p className="text-3xl font-bold text-green-600">{totalXP}</p>
+                    </div>
+                    <div className="bg-white p-6 rounded-xl shadow-md">
+                        <h3 className="text-gray-600 text-sm">Total Workouts</h3>
+                        <p className="text-3xl font-bold text-purple-600">{workouts.length}</p>
+                    </div>
+                    
+                    {/* ✅ NAYA STREAK CARD */}
+                    <div className="bg-gradient-to-br from-orange-400 to-red-500 p-6 rounded-xl shadow-md text-white">
+                        <h3 className="text-white/90 text-sm font-semibold">Current Streak 🔥</h3>
+                        <p className="text-3xl font-bold">{calculateStreak(workouts)} Days</p>
                     </div>
                 </div>
                 
