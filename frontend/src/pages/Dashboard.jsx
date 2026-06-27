@@ -21,6 +21,12 @@ const Dashboard = () => {
     });
     const [goalInput, setGoalInput] = useState(100);
 
+    //States for AI COACH
+    const [selectedWorkout, setSelectedWorkout] = useState(null);
+    const [aiFeedback, setAiFeedback] = useState('');
+    const [loadingAI, setLoadingAI] = useState(false);
+    const [showAIModal, setShowAIModal] = useState(false);
+
 
     // 2. DATA FETCHING FUNCTION (Reusable banaya)
     const fetchWorkouts = async () => {
@@ -97,6 +103,42 @@ const Dashboard = () => {
         } catch (error) {
             toast.error('Failed to update goal');
         }
+    };
+
+    //Get AI Feedback for a Workout 
+   const handleGetAIFeedback = async (workout) => {
+    console.log("🤖 AI Button Clicked!");
+    console.log("Workout data:", workout);
+    
+    setSelectedWorkout(workout);
+    setShowAIModal(true);
+    setLoadingAI(true);
+    setAiFeedback('');
+
+    try {
+        console.log("📡 Sending API request to /ai/coach");
+        const response = await api.post('/ai/coach', {
+            type: workout.type,
+            duration: workout.duration,
+            calorieBurned: workout.calories
+        });
+        
+        console.log("✅ AI Response received:", response.data);
+        setAiFeedback(response.data.aiFeedback);
+    } catch (error) {
+        console.error("❌ AI feedback error:", error);
+        console.error("Error response:", error.response?.data);
+        setAiFeedback('Sorry, AI coach is currently unavailable. Please try again later.');
+    } finally {
+        setLoadingAI(false);
+    }
+};
+
+    //Close AI MODAL
+    const closeAIModal = () => {
+        setShowAIModal(false);
+        setSelectedWorkout(null);
+        setAiFeedback('');
     };
 
 
@@ -186,7 +228,7 @@ const Dashboard = () => {
                         {workouts.map((workout) => (
                             <div key={workout._id} className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition relative">
                                 
-                                {/* ✅ DELETE BUTTON (Top-right corner me) */}
+                                {/* DELETE BUTTON (Top-right corner me) */}
                                 <button
                                     onClick={() => handleDelete(workout._id)}
                                     className="absolute top-4 right-4 text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-full transition"
@@ -206,6 +248,15 @@ const Dashboard = () => {
                                 <p className="mt-4 text-xs text-gray-400">
                                     {new Date(workout.createdAt).toLocaleDateString()}
                                 </p>
+
+                                {/*AI FEEDBACK BUTTON */}
+                                <button
+                                      onClick={() => handleGetAIFeedback(workout)}
+                                      className="mt-4 w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 rounded-lg font-semibold hover:shadow-lg transition transform hover:scale-105 flex items-center justify-center gap-2"
+        
+                                >
+                                     🤖 Get AI Feedback   
+                                </button>
                             </div>
                         ))}
                     </div>
@@ -221,6 +272,75 @@ const Dashboard = () => {
                     </Link>
                 </div>
             </div>
+            
+             {/*  NAYA AI FEEDBACK MODAL */}
+            {showAIModal && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+                        {/* Modal Header */}
+                        <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-6 text-white">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <h3 className="text-2xl font-bold flex items-center gap-2">
+                                        🤖 AI Coach Feedback
+                                    </h3>
+                                    {selectedWorkout && (
+                                        <p className="text-sm opacity-90 mt-1">
+                                            {selectedWorkout.type} • {selectedWorkout.duration} mins
+                                        </p>
+                                    )}
+                                </div>
+                                <button
+                                    onClick={closeAIModal}
+                                    className="text-white hover:bg-white/20 p-2 rounded-full transition"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                        </div>
+                        
+                        {/* Modal Body */}
+                        <div className="p-6 overflow-y-auto max-h-[60vh]">
+                            {loadingAI ? (
+                                <div className="flex flex-col items-center justify-center py-12">
+                                    <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-purple-500 mb-4"></div>
+                                    <p className="text-gray-600 font-semibold">AI Coach is analyzing your workout...</p>
+                                    <p className="text-sm text-gray-500 mt-2">This may take a few seconds</p>
+                                </div>
+                            ) : (
+                                <div className="prose prose-sm max-w-none">
+                                    {aiFeedback.split('\n').map((line, index) => {
+                                        // Bold text handle karo
+                                        if (line.startsWith('**') && line.endsWith('**')) {
+                                            return <h4 key={index} className="text-lg font-bold text-gray-800 mt-4 mb-2">{line.replace(/\*\*/g, '')}</h4>;
+                                        }
+                                        // Bullet points handle karo
+                                        if (line.trim().startsWith('-') || line.trim().startsWith('•')) {
+                                            return <p key={index} className="text-gray-700 ml-4 mb-1">{line}</p>;
+                                        }
+                                        // Empty lines
+                                        if (line.trim() === '') {
+                                            return <br key={index} />;
+                                        }
+                                        // Normal text
+                                        return <p key={index} className="text-gray-700 mb-2">{line}</p>;
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                        
+                        {/* Modal Footer */}
+                        <div className="border-t p-4 bg-gray-50">
+                            <button
+                                onClick={closeAIModal}
+                                className="w-full bg-gray-200 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-300 transition"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
