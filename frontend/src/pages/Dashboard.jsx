@@ -4,7 +4,7 @@ import { Link, useLocation } from 'react-router-dom'; // ✅ useLocation import 
 import Navbar from '../components/Navbar';
 import api from '../services/api';
 import toast from 'react-hot-toast'; // ✅ Toast import kiya
-
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 const Dashboard = () => {
     const { user } = useAuth();
     const location = useLocation(); // ✅ Ye track karega ki user kahan se aaya
@@ -101,6 +101,51 @@ const Dashboard = () => {
         toast.error(error.response?.data?.message || 'Failed to delete workout');
     }
 };
+
+    // ✅ CHARTS COLORS
+    const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
+
+    // ✅ PIE CHART DATA
+       // ✅ PIE CHART DATA (Fixed Version)
+    const getActivityDistribution = () => {
+        const activityMap = {};
+        
+        workouts.forEach(workout => {
+            // 1. Spaces hatayein aur lowercase karein taaki "Running" aur "running" ek ho jayein
+            const rawType = workout.type.trim().toLowerCase();
+            
+            if (!activityMap[rawType]) {
+                // 2. Display ke liye pehla letter capital karein (e.g., "running" -> "Running")
+                const displayName = rawType.charAt(0).toUpperCase() + rawType.slice(1);
+                activityMap[rawType] = { name: displayName, value: 0, minutes: 0 };
+            }
+            
+            activityMap[rawType].value += 1; // Count badhayein
+            activityMap[rawType].minutes += Number(workout.duration); // Minutes add karein
+        });
+        
+        return Object.values(activityMap);
+    };
+
+    // ✅ BAR CHART DATA
+    const getWeeklyActivity = () => {
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const weekData = days.map(day => ({ day, minutes: 0, workouts: 0 }));
+        
+        const today = new Date();
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(today.getDate() - 7);
+        
+        workouts.forEach(workout => {
+            const workoutDate = new Date(workout.createdAt);
+            if (workoutDate >= sevenDaysAgo) {
+                const dayIndex = workoutDate.getDay();
+                weekData[dayIndex].minutes += Number(workout.duration);
+                weekData[dayIndex].workouts += 1;
+            }
+        });
+        return weekData;
+    };
  
 // GOAL UPDATE FUNCTION 
     const handleGoalUpdate = async (e) => {
@@ -216,6 +261,87 @@ const Dashboard = () => {
                             Update
                         </button>
                     </form>
+                </div>
+
+                                {/* ✅ CHARTS SECTION (Donut & Bar Chart) */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+                    
+                    {/* Donut Chart - Activity Distribution */}
+                    <div className="bg-white p-6 rounded-xl shadow-md">
+                        <h2 className="text-xl font-bold text-gray-800 mb-4">Workout Distribution 🥧</h2>
+                        {workouts.length === 0 ? (
+                            <div className="flex items-center justify-center h-64 text-gray-500">
+                                No data yet. Start logging workouts!
+                            </div>
+                        ) : (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <PieChart>
+                                    <Pie
+                                        data={getActivityDistribution()}
+                                        cx="50%"
+                                        cy="50%"
+                                        labelLine={false}
+                                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                        outerRadius={100}
+                                        innerRadius={60}
+                                        fill="#8884d8"
+                                        dataKey="value"
+                                        stroke="#fff"
+                                        strokeWidth={2}
+                                    >
+                                        {getActivityDistribution().map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip 
+                                        formatter={(value, name, props) => {
+                                            return [`${props.payload.minutes} mins (${value} workouts)`, props.payload.name];
+                                        }}
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        )}
+                    </div>
+
+                                        {/* Bar Chart - Weekly Activity */}
+                    <div className="bg-white p-6 rounded-xl shadow-md">
+                        <h2 className="text-xl font-bold text-gray-800 mb-4">Last 7 Days Activity 📊</h2>
+                        {workouts.length === 0 ? (
+                            <div className="flex items-center justify-center h-64 text-gray-500">
+                                No data yet. Start logging workouts!
+                            </div>
+                        ) : (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <BarChart data={getWeeklyActivity()}>
+                                    {/* ✅ SVG Gradient Definition */}
+                                    <defs>
+                                        <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor="#8B5CF6" stopOpacity={0.9}/>
+                                            <stop offset="100%" stopColor="#3B82F6" stopOpacity={0.9}/>
+                                        </linearGradient>
+                                    </defs>
+                                    
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                                    <XAxis dataKey="day" tick={{ fill: '#6B7280' }} axisLine={false} tickLine={false} />
+                                    <YAxis tick={{ fill: '#6B7280' }} axisLine={false} tickLine={false} />
+                                    
+                                    <Tooltip 
+                                        cursor={{ fill: 'rgba(0,0,0,0.05)' }}
+                                        contentStyle={{ 
+                                            backgroundColor: '#fff', 
+                                            border: 'none', 
+                                            borderRadius: '8px', 
+                                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' 
+                                        }}
+                                        formatter={(value) => [`${value} mins`, 'Duration']}
+                                    />
+                                    
+                                    {/* ✅ Gradient Fill Use Karo */}
+                                    <Bar dataKey="minutes" fill="url(#barGradient)" radius={[10, 10, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        )}
+                    </div>
                 </div>
 
                 {/* Workouts List Section */}
