@@ -33,4 +33,28 @@ const handleWeightLog = async (req, res) => {
     }
 };
 
-module.exports = { handleWeightLog };
+//function for history fetching
+const getWeightHistory = async (req, res) => {
+    try {
+        const userId = String(req.user.id);
+        let history = (await WeightHeightLog.find({ userId: userId }));
+
+        //Native Js comparision function
+        history.sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+        let currentBmi = null;
+
+        if(history.length > 0) {
+            const latest = history[history.length - 1];
+            const heightInMeters = latest.heightCm / 100;
+            currentBmi = (latest.weight / (heightInMeters * heightInMeters)).toFixed(1);
+        }
+
+        res.status(200).json({ history, currentBmi });
+    } catch (error) {
+        console.error(' Get weight history serror:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+module.exports = { handleWeightLog, getWeightHistory };

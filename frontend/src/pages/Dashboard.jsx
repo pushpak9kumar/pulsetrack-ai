@@ -76,10 +76,22 @@ const Dashboard = () => {
     }
 };
 
+ //Weight History Fetch Function
+    const fetchWeightHistory = async () => {
+        try {
+            const response = await api.get('/weight/history');
+            setWeightHistory(response.data.history);
+            setCurrentBmi(response.data.currentBmi);
+        } catch(error) {
+            console.error("Failed to fetch weight history:", error);
+        }
+    };
+
     // 3. USE EFFECT - Page load hone par data fetch karo
     useEffect(() => {
     fetchWorkouts();
     fetchUserGoal();
+    fetchWeightHistory();
 }, []);
 
     // 4. AUTO-REFRESH LOGIC - Jab user LogWorkout se wapas aaye
@@ -89,6 +101,7 @@ const Dashboard = () => {
             fetchWorkouts(); // Data dobara fetch karo
         }
     }, [location]); // Jab bhi location change ho, ye chalega
+
 
     // 5. DELETE WORKOUT FUNCTION
  const handleDelete = async (workoutId) => {
@@ -151,6 +164,7 @@ const Dashboard = () => {
             toast.error('Failed to log weight');
         }
     };
+
 
     // ✅ BAR CHART DATA
     const getWeeklyActivity = () => {
