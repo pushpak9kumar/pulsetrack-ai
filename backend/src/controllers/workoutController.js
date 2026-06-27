@@ -132,28 +132,32 @@ const updateWorkout = async(req, res) => {
 };
 
 // =============================Delete Workout ============================
+
+        //Security
+           // ✅ Dono ko number me convert karke compare kar
+// @desc    Delete a workout
+// @route   DELETE /api/workouts/:id
 const deleteWorkout = async (req, res) => {
     try {
         const workout = await Workout.findById(req.params.id);
 
-        if(!workout) {
-            return res.status(404).json({ message: 'Workout not found'});
+        if (!workout) {
+            return res.status(404).json({ message: "Workout not found" });
         }
 
-        //Security
-        if(workout.userId.toString() !== req.user.id) {
-            return res.status(401).json({ message: 'Not authorized to delete this workout' });
+        // Authorization check - dono ko String me convert karke compare karo
+        if (String(workout.userId) !== String(req.user.id)) {
+            return res.status(401).json({ message: "Not authorized to delete this workout" });
         }
 
-        await workout.findByIdAndDelete(req.params.id);
+        await Workout.findByIdAndDelete(req.params.id);
 
-        res.json({ message: 'workout deleted successfully '});
-    }catch (error) {
-        console.error('Deleteworkout error:', error);
-        res.status(500).json({ message: 'Server error', error: error.message });
-    };
-
-}
+        res.status(200).json({ message: "Workout deleted successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
     module.exports = {
         createWorkout,
         getWorkouts,

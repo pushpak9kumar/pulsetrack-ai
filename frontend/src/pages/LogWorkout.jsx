@@ -34,7 +34,7 @@ const LogWorkout = () => {
         setLoading(true);
 
         try {
-            // 2. DATA FIXING: Backend ko sahi format me data bhejo
+            
             const payload = {
                 type: formData.exerciseName,       
                 duration: Number(formData.duration), 
@@ -46,16 +46,16 @@ const LogWorkout = () => {
             const response = await api.post('/workouts', payload);
             
             toast.success('Workout logged successfully! 🎉');
-            navigate('/dashboard');
+            navigate('/dashboard', { state: {refreshDashboard: true} });
             
         } catch (error) {
-            console.error("Backend Error:", error);
+            console.error("Backend Error:", error.response?.data);
             toast.error(error.response?.data?.message || 'Failed to log workout');
         } finally {
             setLoading(false);
         }
     };
-    // ✅ Return statement function ke andar hai
+    
     return (
         <div className="min-h-screen bg-gray-50">
             <Navbar />
@@ -125,6 +125,6 @@ const LogWorkout = () => {
         </div>
     );
 };
-// ✅ Component khatam (Dhyan de: yahan '}' bracket hai)
+
 
 export default LogWorkout;

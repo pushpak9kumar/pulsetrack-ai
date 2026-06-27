@@ -23,14 +23,16 @@ const Login = () => {
             const response = await api.post('/auth/login', formData);
             const { token, user } = response.data;
             
+            console.log("Login response received!"); // ✅ Ye line add kar
+        console.log("Token from backend:", token);
+        console.log("User from backend:", user);
+
             login(user, token);
             toast.success('Login successful! 🎉');
             navigate('/dashboard');
             
         } catch (error) {
-            // ✅ Better error handling
             console.error('Login error:', error);
-            
             const message = error.response?.data?.message || 
                            error.response?.data?.error ||
                            'Invalid email or password. Please try again.';

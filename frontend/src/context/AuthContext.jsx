@@ -23,6 +23,11 @@ export const AuthProvider = ({ children }) => {
 
     //Login function(backend se token aaya toh call hoga)
     const login = (userData, tokenValue) => {
+
+        console.log("Login function called!"); // ✅ Ye line add kar
+    console.log("User data:", userData);
+    console.log("Token value:", tokenValue);
+    
         setUser(userData);
         setToken(tokenValue);
         localStorage.setItem('token', tokenValue);
