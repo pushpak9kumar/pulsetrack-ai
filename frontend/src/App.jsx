@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import LogWorkout from './pages/LogWorkout';
 
@@ -11,8 +12,10 @@ import Dashboard from './pages/Dashboard';
 
 function App() {
     return (
-        // 1. Sabse pehle AuthProvider (Global Data ka Dabba)
-        <AuthProvider>
+    //ThemeProvider ko sabse pehle rakho
+      <ThemeProvider>
+        {/*1. Sabse pehle AuthProvider (Global Data ka Dabba) */}
+         <AuthProvider>
             {/* 2. Uske andar Router (URL handle karne wala) */}
             <Router>
                 <Toaster position="top-right" />
@@ -37,7 +40,8 @@ function App() {
                     
                 </Routes>
             </Router>
-        </AuthProvider>
+         </AuthProvider>
+     </ThemeProvider>   
     );
 }
 
