@@ -53,19 +53,28 @@ const Dashboard = () => {
     };
   // fetch goal fumction
      const fetchUserGoal = async () => {
-        try {
-            const response = await api.get('/users/goal');
-            setUserGoal(response.data);
-            setGoalInput(response.data.targetValue);
-        } catch (error) {
-            console.error("Failed to fetch goal:", error);
-        }
-    };
+    try {
+        // ✅ Cache busting add karo taaki browser purana data na dikhaye
+        const response = await api.get('/users/goal', {
+            headers: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            }
+        });
+        
+        console.log("📥 Fetched Goal from Backend:", response.data);
+        setUserGoal(response.data);
+        setGoalInput(response.data.targetValue);
+    } catch (error) {
+        console.error("Failed to fetch goal:", error);
+    }
+};
 
     // 3. USE EFFECT - Page load hone par data fetch karo
     useEffect(() => {
-        fetchWorkouts();
-    }, []);
+    fetchWorkouts();
+    fetchUserGoal();
+}, []);
 
     // 4. AUTO-REFRESH LOGIC - Jab user LogWorkout se wapas aaye
     useEffect(() => {
