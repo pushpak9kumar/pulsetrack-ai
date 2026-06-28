@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -17,10 +17,12 @@ const AVATARS = [
 const EditProfile = () => {
     const { user, fetchProfile } = useAuth();
     const navigate = useNavigate();
+    const fileInputRef = useRef(null);
     
     const [name, setName] = useState(user?.name || '');
     const [selectedAvatar, setSelectedAvatar] = useState(user?.avatar || 1);
     const [loading, setLoading] = useState(false);
+    const [uploading, setUploading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -40,6 +42,36 @@ const EditProfile = () => {
             console.error(error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error('File size should be less than 5MB');
+            return;
+        }
+
+        setUploading(true);
+        const formData = new FormData();
+        formData.append('avatar', file);
+
+        try {
+            await api.post('/profile/upload-avatar', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            
+            await fetchProfile();
+            toast.success('Avatar uploaded successfully! 📸');
+        } catch (error) {
+            toast.error('Failed to upload avatar');
+            console.error(error);
+        } finally {
+            setUploading(false);
         }
     };
 
@@ -82,7 +114,7 @@ const EditProfile = () => {
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-3">
                             Choose Your Avatar
                         </label>
-                        <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+                        <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mb-4">
                             {AVATARS.map((avatar) => (
                                 <button
                                     key={avatar.id}
@@ -97,6 +129,37 @@ const EditProfile = () => {
                                     {avatar.emoji}
                                 </button>
                             ))}
+                        </div>
+
+                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                                Or Upload Your Own Photo
+                            </label>
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleFileUpload}
+                                accept="image/*"
+                                className="hidden"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={uploading}
+                                className="w-full px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:border-blue-500 hover:text-blue-500 transition disabled:opacity-50"
+                            >
+                                {uploading ? 'Uploading...' : '📸 Click to Upload Photo (Max 5MB)'}
+                            </button>
+                            {user?.avatarUrl && (
+                                <div className="mt-4 flex items-center gap-3">
+                                    <img 
+                                        src={`http://localhost:5000${user.avatarUrl}`} 
+                                        alt="Current avatar"
+                                        className="w-16 h-16 rounded-full object-cover"
+                                    />
+                                    <p className="text-sm text-gray-600 dark:text-gray-300">Current custom photo</p>
+                                </div>
+                            )}
                         </div>
                     </div>
 
