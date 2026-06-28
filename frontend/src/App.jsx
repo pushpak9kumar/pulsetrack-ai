@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import LogWorkout from './pages/LogWorkout';
+import  EditProfile from './pages/EditProfile';
 
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -37,6 +38,12 @@ function App() {
                             <LogWorkout />
                         </ProtectedRoute>
                     } />
+
+                    <Route path="/edit-profile" element={
+                      <ProtectedRoute>
+                           <EditProfile />
+                       </ProtectedRoute>
+} />
                     
                 </Routes>
             </Router>

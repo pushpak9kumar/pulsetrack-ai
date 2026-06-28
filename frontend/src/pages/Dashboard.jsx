@@ -226,7 +226,6 @@ const Dashboard = () => {
         setAiFeedback('');
 
         try {
-            console.log("📡 Sending API request to /ai/coach");
             const response = await api.post('/ai/coach', {
                 type: workout.type,
                 duration: workout.duration,
@@ -236,7 +235,6 @@ const Dashboard = () => {
             console.log("✅ AI Response received:", response.data);
             setAiFeedback(response.data.aiFeedback);
         } catch (error) {
-            console.error("❌ AI feedback error:", error);
             console.error("Error response:", error.response?.data);
             setAiFeedback('Sorry, AI coach is currently unavailable. Please try again later.');
         } finally {
@@ -255,6 +253,13 @@ const Dashboard = () => {
     const progressPercentage = Math.min((totalMinutes / userGoal.targetValue) * 100, 100);
     const totalXP = workouts.length * 10;
     const level = Math.floor(totalXP / 100) + 1;
+
+    const getLevelBadge = (level) => {
+    if (level >= 20) return { title: 'Legend', icon: '👑', color: 'from-yellow-400 to-orange-500' };
+    if (level >= 10) return { title: 'Beast', icon: '🦍', color: 'from-red-500 to-pink-600' };
+    if (level >= 5) return { title: 'Rising Star', icon: '⭐', color: 'from-purple-500 to-blue-600' };
+    return { title: 'Beginner', icon: '🌱', color: 'from-green-500 to-emerald-600' };
+};
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">

@@ -18,10 +18,13 @@ model User {
   email     String   @unique
   password  String
   name      String
+  avatar    Int?
+  avatarUrl String?
   xp        Int      @default(0)
   level     Int      @default(1)
   createdAt DateTime @default(now())
   goals     Goal[]
+  updatedAt DateTime? @updatedAt
 }
 
 model Goal {
