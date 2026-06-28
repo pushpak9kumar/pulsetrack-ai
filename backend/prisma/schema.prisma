@@ -24,6 +24,7 @@ model User {
   level     Int      @default(1)
   createdAt DateTime @default(now())
   goals     Goal[]
+  goalHistory   GoalHistory[]
   updatedAt DateTime? @updatedAt
 }
 
@@ -34,4 +35,12 @@ model Goal {
   currentValue Int      @default(0)
   userId       Int
   user         User     @relation(fields: [userId], references: [id])
+}
+
+model GoalHistory {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  targetValue   Int
+  completedAt   DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

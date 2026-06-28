@@ -11,6 +11,7 @@ const aiRoutes = require('./routes/aiRoutes');
 const userRoutes = require('./routes/userRoutes');
 const weightHeightRoutes = require('./routes/weightHeightRoutes');
 const profileRoutes = require('./routes/profileRoutes');
+const goalRoutes = require('./routes/goalRoutes');
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/weight', weightHeightRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/uploads', express.static('public/uploads'));
+app.use('/api/users', goalRoutes);
 
 //basic test routh
 app.get('/', (req,res) => {

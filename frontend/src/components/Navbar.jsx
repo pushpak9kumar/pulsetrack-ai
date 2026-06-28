@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import api from '../services/api';
 
 const AVATARS = [
     { id: 1, gradient: 'from-blue-500 to-purple-600', emoji: '👤' },
@@ -25,6 +26,7 @@ const Navbar = () => {
     const { theme, toggleTheme } = useTheme();
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [goalHistory, setGoalHistory] = useState([]);
     const dropdownRef = useRef(null);
 
     const handleLogout = () => {
@@ -54,6 +56,21 @@ const Navbar = () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
+
+    useEffect(() => {
+    const fetchGoalHistory = async () => {
+        if (isAuthenticated) {
+            try {
+                const response = await api.get('/users/goal/history');
+                console.log("🏆 Goal History Response:", response.data); // ✅ Ye line add ki
+                setGoalHistory(response.data);
+            } catch (error) {
+                console.error('Failed to fetch goal history:', error);
+            }
+        }
+    };
+    fetchGoalHistory();
+}, [isAuthenticated]);
 
     const currentAvatar = AVATARS.find(a => a.id === user?.avatar) || AVATARS[0];
     const level = 1;
@@ -86,43 +103,43 @@ const Navbar = () => {
                     {isAuthenticated && user ? (
                         <div className="relative" ref={dropdownRef}>
                             <button 
-                                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                 className="flex items-center gap-2 focus:outline-none"
->
-                                 {user.avatarUrl ? (
-                                       <img 
-                                           src={`http://localhost:5000${user.avatarUrl}`} 
-                                           alt="User avatar"
-                                            className="w-9 h-9 rounded-full object-cover shadow-md hover:shadow-lg transition"
-                                       />
-                                   ) : (
-                                       <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${currentAvatar.gradient} flex items-center justify-center text-white text-lg shadow-md hover:shadow-lg transition`}>
-                                             {currentAvatar.emoji}
-                                        </div>
-                                   )}
-                             </button>
+                                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                                className="flex items-center gap-2 focus:outline-none"
+                            >
+                                {user.avatarUrl ? (
+                                    <img 
+                                        src={`http://localhost:5000${user.avatarUrl}`} 
+                                        alt="User avatar"
+                                        className="w-9 h-9 rounded-full object-cover shadow-md hover:shadow-lg transition"
+                                    />
+                                ) : (
+                                    <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${currentAvatar.gradient} flex items-center justify-center text-white text-lg shadow-md hover:shadow-lg transition`}>
+                                        {currentAvatar.emoji}
+                                    </div>
+                                )}
+                            </button>
 
                             {isDropdownOpen && (
                                 <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50">
                                     <div className="px-4 py-4 bg-gradient-to-br from-blue-500 to-purple-600 text-white">
                                         <div className="flex items-center gap-3">
-                                             {user.avatarUrl ? (
-                                                  <img 
-                                                   src={`http://localhost:5000${user.avatarUrl}`} 
+                                            {user.avatarUrl ? (
+                                                <img 
+                                                    src={`http://localhost:5000${user.avatarUrl}`} 
                                                     alt="User avatar"
                                                     className="w-12 h-12 rounded-full object-cover border-2 border-white/20"
-                                                  />
-                                              ) : (
-                                                  <div className={`w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-2xl`}>
-                                                       {currentAvatar.emoji}
-                                                   </div>
-                                                  )}
-                                                   <div className="flex-1 min-w-0">
-                                                        <p className="font-semibold truncate">{user.name}</p>
-                                                        <p className="text-xs opacity-90 truncate">{user.email}</p>
-                                                    </div>
-                                              </div>
-                                         </div>
+                                                />
+                                            ) : (
+                                                <div className={`w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-2xl`}>
+                                                    {currentAvatar.emoji}
+                                                </div>
+                                            )}
+                                            <div className="flex-1 min-w-0">
+                                                <p className="font-semibold truncate">{user.name}</p>
+                                                <p className="text-xs opacity-90 truncate">{user.email}</p>
+                                            </div>
+                                        </div>
+                                    </div>
 
                                     <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
                                         <div className="flex items-center justify-between">
@@ -136,6 +153,24 @@ const Navbar = () => {
                                             </div>
                                         </div>
                                     </div>
+
+                                    {goalHistory.length > 0 && (
+                                        <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+                                            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">🏆 Goal History</p>
+                                            <div className="space-y-1 max-h-32 overflow-y-auto">
+                                                {goalHistory.slice(0, 5).map((goal, index) => (
+                                                    <div key={goal.id} className="flex items-center justify-between text-xs">
+                                                        <span className="text-gray-600 dark:text-gray-300">
+                                                            {goal.targetValue} mins
+                                                        </span>
+                                                        <span className="text-gray-400 dark:text-gray-500">
+                                                            {new Date(goal.completedAt).toLocaleDateString()}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                     
                                     <div className="py-1">
                                         <button 

@@ -58,21 +58,25 @@ const Dashboard = () => {
     };
 
     const fetchUserGoal = async () => {
-        try {
-            const response = await api.get('/users/goal', {
-                headers: {
-                    'Cache-Control': 'no-cache',
-                    'Pragma': 'no-cache'
-                }
-            });
-            
-            console.log("📥 Fetched Goal from Backend:", response.data);
-            setUserGoal(response.data);
-            setGoalInput(response.data.targetValue);
-        } catch (error) {
-            console.error("Failed to fetch goal:", error);
+    try {
+        const response = await api.get('/users/goal', {
+            headers: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            }
+        });
+        
+        console.log("📥 Fetched Goal from Backend:", response.data);
+        setUserGoal(response.data);
+        setGoalInput(response.data.targetValue);
+        
+        if (response.data.achieved) {
+            toast.success('🎉 Weekly Goal Achieved! Great job!');
         }
-    };
+    } catch (error) {
+        console.error("Failed to fetch goal:", error);
+       }
+};
 
     const fetchWeightHistory = async () => {
         try {
