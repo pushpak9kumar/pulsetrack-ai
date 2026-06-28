@@ -29,12 +29,15 @@ const EditProfile = () => {
         setLoading(true);
         
         try {
-            await api.put('/profile', {
-                name,
-                avatar: selectedAvatar
-            });
+            const payload = { name };
             
+            if (selectedAvatar && Number(selectedAvatar) > 0) {
+                payload.avatar = Number(selectedAvatar);
+            }
+            
+            await api.put('/profile', payload);
             await fetchProfile();
+            
             toast.success('Profile updated successfully! ✨');
             navigate('/dashboard');
         } catch (error) {
@@ -66,6 +69,7 @@ const EditProfile = () => {
             });
             
             await fetchProfile();
+            setSelectedAvatar(null);
             toast.success('Avatar uploaded successfully! 📸');
         } catch (error) {
             toast.error('Failed to upload avatar');

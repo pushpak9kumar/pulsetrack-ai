@@ -13,8 +13,10 @@ export const AuthProvider = ({ children }) => {
             const response = await api.get('/profile');
             setUser(response.data);
             localStorage.setItem('user', JSON.stringify(response.data));
+            return response.data;
         } catch (error) {
             console.error('Failed to fetch profile:', error);
+            return null;
         }
     };
 
@@ -22,22 +24,22 @@ export const AuthProvider = ({ children }) => {
         const storedToken = localStorage.getItem('token');
         const storedUser = localStorage.getItem('user');
 
-        if (storedToken && storedUser) {
+        if (storedToken) {
             setToken(storedToken);
-            setUser(JSON.parse(storedUser));
+            if (storedUser) {
+                setUser(JSON.parse(storedUser));
+            }
             fetchProfile();
         }
         setLoading(false);
     }, []);
 
     const login = (userData, tokenValue) => {
-        console.log("User data:", userData);
-        console.log("Token value:", tokenValue);
-
         setUser(userData);
         setToken(tokenValue);
         localStorage.setItem('token', tokenValue);
         localStorage.setItem('user', JSON.stringify(userData));
+        setTimeout(() => fetchProfile(), 100);
     };
 
     const logout = () => {

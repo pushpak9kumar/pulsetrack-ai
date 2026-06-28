@@ -33,9 +33,14 @@ const updateUserProfile = async (req, res) => {
         
         const updateData = {};
         if (name) updateData.name = name;
-        if (avatar !== undefined) {
+        
+        if (avatar !== undefined && avatar !== null && Number(avatar) > 0) {
             updateData.avatar = Number(avatar);
             updateData.avatarUrl = null;
+        }
+
+        if (Object.keys(updateData).length === 0) {
+            return res.status(400).json({ message: 'No data to update' });
         }
 
         const updatedUser = await prisma.user.update({
@@ -66,8 +71,9 @@ const uploadAvatar = async (req, res) => {
             return res.status(400).json({ message: 'No file uploaded' });
         }
 
+        const userId = Number(req.user.id);
         const user = await prisma.user.findUnique({
-            where: { id: Number(req.user.id) }
+            where: { id: userId }
         });
         
         if (user.avatarUrl) {
@@ -82,10 +88,10 @@ const uploadAvatar = async (req, res) => {
         const avatarUrl = `/uploads/${req.file.filename}`;
         
         const updatedUser = await prisma.user.update({
-            where: { id: Number(req.user.id) },
+            where: { id: userId },
             data: { 
-                avatarUrl: avatarUrl, 
-                avatar: null 
+                avatarUrl: avatarUrl,
+                avatar: null
             },
             select: {
                 id: true,

@@ -253,10 +253,38 @@ const Dashboard = () => {
     };
 
     // 5. CALCULATIONS
-    const totalMinutes = workouts.reduce((sum, w) => sum + Number(w.duration), 0);
-    const progressPercentage = Math.min((totalMinutes / userGoal.targetValue) * 100, 100);
-    const totalXP = workouts.length * 10;
-    const level = Math.floor(totalXP / 100) + 1;
+    const calculateXP = (workouts) => {
+    const intensityMap = {
+        'running': 2,
+        'run': 2,
+        'cycling': 2,
+        'cycle': 2,
+        'swimming': 2,
+        'swim': 2,
+        'gym': 1.5,
+        'weights': 1.5,
+        'weightlifting': 1.5,
+        'yoga': 1,
+        'walking': 1,
+        'walk': 1,
+    };
+    
+    return workouts.reduce((total, workout) => {
+        const type = workout.type.toLowerCase().trim();
+        const intensity = intensityMap[type] || 1.5;
+        const xp = Math.floor(Number(workout.duration) * intensity);
+        return total + xp;
+    }, 0);
+};
+
+const calculateLevel = (totalXP) => {
+    return Math.floor(Math.sqrt(totalXP / 50)) + 1;
+};
+
+const totalMinutes = workouts.reduce((sum, w) => sum + Number(w.duration), 0);
+const progressPercentage = Math.min((totalMinutes / userGoal.targetValue) * 100, 100);
+const totalXP = calculateXP(workouts);
+const level = calculateLevel(totalXP);
 
     const getLevelBadge = (level) => {
     if (level >= 20) return { title: 'Legend', icon: '👑', color: 'from-yellow-400 to-orange-500' };
@@ -264,6 +292,18 @@ const Dashboard = () => {
     if (level >= 5) return { title: 'Rising Star', icon: '⭐', color: 'from-purple-500 to-blue-600' };
     return { title: 'Beginner', icon: '🌱', color: 'from-green-500 to-emerald-600' };
 };
+
+const [previousLevel, setPreviousLevel] = useState(level);
+
+useEffect(() => {
+    if (level > previousLevel) {
+        toast.success(`🎉 Level Up! You are now Level ${level}!`, {
+            duration: 4000,
+            icon: '🚀'
+        });
+        setPreviousLevel(level);
+    }
+}, [level, previousLevel]);
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">

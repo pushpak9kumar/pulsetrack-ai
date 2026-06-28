@@ -20,6 +20,25 @@ const getLevelBadge = (level) => {
     return { title: 'Beginner', icon: '🌱', color: 'from-green-500 to-emerald-600' };
 };
 
+const calculateXP = (workouts) => {
+    const intensityMap = {
+        'running': 2, 'run': 2, 'cycling': 2, 'cycle': 2,
+        'swimming': 2, 'swim': 2, 'gym': 1.5, 'weights': 1.5,
+        'weightlifting': 1.5, 'yoga': 1, 'walking': 1, 'walk': 1,
+    };
+    
+    if (!workouts) return 0;
+    return workouts.reduce((total, workout) => {
+        const type = workout.type.toLowerCase().trim();
+        const intensity = intensityMap[type] || 1.5;
+        return total + Math.floor(Number(workout.duration) * intensity);
+    }, 0);
+};
+
+const calculateLevel = (totalXP) => {
+    return Math.floor(Math.sqrt(totalXP / 50)) + 1;
+};
+
 const Navbar = () => {
     const { user, logout, isAuthenticated } = useAuth();
     const navigate = useNavigate();
@@ -27,21 +46,14 @@ const Navbar = () => {
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [goalHistory, setGoalHistory] = useState([]);
+    const [userWorkouts, setUserWorkouts] = useState([]);
     const dropdownRef = useRef(null);
+
+    console.log('🔍 Navbar Render - isAuthenticated:', isAuthenticated, 'user:', user);
 
     const handleLogout = () => {
         logout();
         navigate('/login');
-    };
-
-    const getInitials = (name) => {
-        if (!name) return "U";
-        return name
-            .split(' ')
-            .map(word => word.charAt(0))
-            .join('')
-            .toUpperCase()
-            .substring(0, 2);
     };
 
     useEffect(() => {
@@ -58,22 +70,50 @@ const Navbar = () => {
     }, []);
 
     useEffect(() => {
-    const fetchGoalHistory = async () => {
-        if (isAuthenticated) {
-            try {
-                const response = await api.get('/users/goal/history');
-                console.log("🏆 Goal History Response:", response.data); // ✅ Ye line add ki
-                setGoalHistory(response.data);
-            } catch (error) {
-                console.error('Failed to fetch goal history:', error);
+        console.log('🏃 Goal History useEffect running, isAuthenticated:', isAuthenticated);
+        const fetchGoalHistory = async () => {
+            if (isAuthenticated) {
+                try {
+                    console.log('📡 Fetching goal history...');
+                    const response = await api.get('/users/goal/history');
+                    console.log('🏆 Goal History Response:', response.data);
+                    setGoalHistory(response.data);
+                } catch (error) {
+                    console.error('❌ Failed to fetch goal history:', error);
+                }
+            } else {
+                console.log('⚠️ Not authenticated, skipping goal history fetch');
             }
-        }
-    };
-    fetchGoalHistory();
-}, [isAuthenticated]);
+        };
+        
+        fetchGoalHistory();
+    }, [isAuthenticated]);
+
+    useEffect(() => {
+        const fetchWorkouts = async () => {
+            if (isAuthenticated) {
+                try {
+                    const response = await api.get('/workouts');
+                    let fetchedWorkouts = [];
+                    if (Array.isArray(response.data)) {
+                        fetchedWorkouts = response.data;
+                    } else if (response.data && Array.isArray(response.data.workouts)) {
+                        fetchedWorkouts = response.data.workouts;
+                    } else if (response.data && Array.isArray(response.data.data)) {
+                        fetchedWorkouts = response.data.data;
+                    }
+                    setUserWorkouts(fetchedWorkouts);
+                } catch (error) {
+                    console.error('Failed to fetch workouts:', error);
+                }
+            }
+        };
+        fetchWorkouts();
+    }, [isAuthenticated]);
 
     const currentAvatar = AVATARS.find(a => a.id === user?.avatar) || AVATARS[0];
-    const level = 1;
+    const totalXP = calculateXP(userWorkouts);
+    const level = calculateLevel(totalXP);
     const levelBadge = getLevelBadge(level);
 
     return (
@@ -146,6 +186,10 @@ const Navbar = () => {
                                             <div>
                                                 <p className="text-xs text-gray-500 dark:text-gray-400">Level</p>
                                                 <p className="text-lg font-bold text-gray-800 dark:text-gray-100">{level}</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-xs text-gray-500 dark:text-gray-400">Total XP</p>
+                                                <p className="text-lg font-bold text-gray-800 dark:text-gray-100">{totalXP}</p>
                                             </div>
                                             <div className={`px-3 py-1 rounded-full bg-gradient-to-r ${levelBadge.color} text-white text-xs font-semibold flex items-center gap-1`}>
                                                 <span>{levelBadge.icon}</span>
