@@ -42,9 +42,13 @@ const createWorkout = async (req, res) => {
             }
         });
 
-       res.status(201).json({
+      const { checkAndUnlockBadges } = require('./achievementController');
+const newBadges = await checkAndUnlockBadges(req.user.id);
+
+res.status(201).json({
     message: 'Workout logged successfully',
     workout: newWorkout,
+    newBadges: newBadges,
     xpEarned: earnedXP,
     userStats: {
         totalXP: newTotalXP,
@@ -53,7 +57,7 @@ const createWorkout = async (req, res) => {
     }
 });
 
-    } catch (error) {
+ } catch (error) {
         console.error('Create workout error:', error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }

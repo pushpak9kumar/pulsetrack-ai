@@ -10,6 +10,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Achievements from './pages/Achievements';
 
 function App() {
     return (
@@ -43,7 +44,13 @@ function App() {
                       <ProtectedRoute>
                            <EditProfile />
                        </ProtectedRoute>
-} />
+                    } />
+
+                    <Route path="/achievements" element={
+                        <ProtectedRoute>
+                            <Achievements />
+                        </ProtectedRoute>
+                    } />
                     
                 </Routes>
             </Router>
