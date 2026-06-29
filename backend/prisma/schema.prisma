@@ -40,11 +40,16 @@ model Goal {
 }
 
 model GoalHistory {
-  id            Int      @id @default(autoincrement())
-  userId        Int
-  targetValue   Int
-  completedAt   DateTime @default(now())
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  targetValue Int
+  completedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+   
+  @@index([userId])
+  @@map("goal_history")
 }
 
 model Achievement {

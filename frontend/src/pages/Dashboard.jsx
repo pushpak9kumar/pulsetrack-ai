@@ -15,12 +15,15 @@ const Dashboard = () => {
     const [loadingWorkouts, setLoadingWorkouts] = useState(true);
 
     // GOAL STATES 
-    const [userGoal, setUserGoal] = useState({ 
-        targetValue: 100, 
-        currentValue: 0, 
-        title: "Weekly Goal" 
-    });
-    const [goalInput, setGoalInput] = useState(100);
+   const [userGoal, setUserGoal] = useState({ 
+    targetValue: 100, 
+    currentValue: 0, 
+    title: "Weekly Goal" 
+});
+const [goalHistory, setGoalHistory] = useState([]); 
+const [showGoalHistory, setShowGoalHistory] = useState(false); 
+
+const [goalInput, setGoalInput] = useState('');
 
     //States for AI COACH
     const [selectedWorkout, setSelectedWorkout] = useState(null);
@@ -83,6 +86,17 @@ const Dashboard = () => {
     }
 };
 
+   const fetchGoalHistory = async () => {
+    try {
+        const response = await api.get('/users/goal/history');
+        setGoalHistory(response.data);
+    } catch (error) {
+        console.error("Failed to fetch goal history:", error);
+        // Set empty array as fallback
+        setGoalHistory([]);
+    }
+};
+
     const fetchWeightHistory = async () => {
         try {
             const response = await api.get('/weight/history');
@@ -97,6 +111,7 @@ const Dashboard = () => {
     useEffect(() => {
         fetchWorkouts();
         fetchUserGoal();
+        fetchGoalHistory();
         fetchWeightHistory();
     }, []);
 
@@ -214,15 +229,22 @@ const Dashboard = () => {
 
     // GOAL UPDATE FUNCTION 
     const handleGoalUpdate = async (e) => {
-        e.preventDefault();
-        try {
-            await api.put('/users/goal', { targetValue: goalInput });
-            setUserGoal({ ...userGoal, targetValue: Number(goalInput) });
-            toast.success('Weekly goal updated! 🎯');
-        } catch (error) {
-            toast.error('Failed to update goal');
-        }
-    };
+    e.preventDefault();
+    if (!goalInput || goalInput <= 0) {
+        toast.error('Please enter a valid goal');
+        return;
+    }
+    
+    try {
+        await api.put('/users/goal', { targetValue: Number(goalInput) });
+        toast.success('Goal updated successfully! 🎯');
+        setGoalInput('');
+        fetchUserGoal(); // Refresh goal data
+    } catch (error) {
+        toast.error('Failed to update goal');
+        console.error(error);
+    }
+};
 
     // Get AI Feedback
     const handleGetAIFeedback = async (workout) => {
@@ -357,37 +379,78 @@ const formatInlineMarkdown = (text) => {
                     </div>
                 </div>
                 
-                {/* GOAL & PROGRESS BAR SECTION */}
-                <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-md mb-8 sm:mb-10 transition-colors duration-300">
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
-                        <h2 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100">Weekly Goal Progress 🎯</h2>
-                        <span className="text-xs sm:text-sm font-semibold text-blue-600 dark:text-blue-400">
-                            {totalMinutes} / {userGoal.targetValue} mins
-                        </span>
-                    </div>
-                    
-                    {/* Progress Bar */}
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 sm:h-4 mb-4">
-                        <div 
-                            className="bg-gradient-to-r from-blue-500 to-green-500 h-3 sm:h-4 rounded-full transition-all duration-500 ease-out"
-                            style={{ width: `${progressPercentage}%` }}
-                        ></div>
-                    </div>
+               {/* GOAL & PROGRESS BAR SECTION */}
+<div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-md mb-8 sm:mb-10 transition-colors duration-300">
+    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
+        <h2 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100">Weekly Goal Progress 🎯</h2>
+        <div className="flex items-center gap-2">
+            <span className="text-xs sm:text-sm font-semibold text-blue-600 dark:text-blue-400">
+                {userGoal.currentValue} / {userGoal.targetValue} mins
+            </span>
+            
+            {/* Goal History Dropdown Button */}
+            <button
+                onClick={() => setShowGoalHistory(!showGoalHistory)}
+                className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition flex items-center gap-1"
+                title="View Goal History"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                History
+            </button>
+        </div>
+    </div>
+    
+    {/* Progress Bar */}
+    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 sm:h-4 mb-4">
+        <div 
+            className="bg-gradient-to-r from-blue-500 to-green-500 h-3 sm:h-4 rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${progressPercentage}%` }}
+        ></div>
+    </div>
 
-                    {/* Goal Update Form */}
-                    <form onSubmit={handleGoalUpdate} className="flex flex-col sm:flex-row gap-2 sm:items-center">
-                        <label className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Set new goal (mins):</label>
-                        <input 
-                            type="number" 
-                            value={goalInput}
-                            onChange={(e) => setGoalInput(e.target.value)}
-                            className="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded px-2 py-1 w-full sm:w-24 text-sm"
-                        />
-                        <button type="submit" className="bg-blue-500 text-white px-3 py-1.5 sm:py-1 rounded text-sm hover:bg-blue-600 transition w-full sm:w-auto">
-                            Update
-                        </button>
-                    </form>
+    {/* Goal Update Form */}
+    <form onSubmit={handleGoalUpdate} className="flex flex-col sm:flex-row gap-2 sm:items-center">
+        <label className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Set new goal (mins):</label>
+        <input 
+            type="number" 
+            value={goalInput}
+            onChange={(e) => setGoalInput(e.target.value)}
+            className="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded px-2 py-1 w-full sm:w-24 text-sm"
+        />
+        <button type="submit" className="bg-blue-500 text-white px-3 py-1.5 sm:py-1 rounded text-sm hover:bg-blue-600 transition w-full sm:w-auto">
+            Update
+        </button>
+    </form>
+
+    {/* Goal History Dropdown */}
+    {showGoalHistory && (
+        <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
+            <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center gap-2">
+                📜 Recent Goals (Last 10)
+            </h3>
+            {goalHistory.length === 0 ? (
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center py-2">
+                    No completed goals yet. Keep working! 💪
+                </p>
+            ) : (
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {goalHistory.map((goal, index) => (
+                        <div key={goal.id} className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded text-xs sm:text-sm">
+                            <span className="text-gray-700 dark:text-gray-200 font-medium">
+                                {goal.targetValue} mins
+                            </span>
+                            <span className="text-gray-500 dark:text-gray-400">
+                                {new Date(goal.completedAt).toLocaleDateString()}
+                            </span>
+                        </div>
+                    ))}
                 </div>
+            )}
+        </div>
+    )}
+</div>
 
                 {/* CHARTS SECTION */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-8 sm:mb-10">

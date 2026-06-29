@@ -1,100 +1,210 @@
-const prisma = require('../config/sqlConfig');
-const { calculateLevel } = require('../services/xpService');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+const Workout = require('../models/Workout');
 
-//function to see user progress
-const getUserStats = async ( req, res) => {
+// Save goal to history and reset
+const saveGoalToHistoryAndReset = async (userId, goalId) => {
     try {
-        const user = await prisma.user.findUnique({
-            where: { id: req.user.id },
-            select:{
-                id: true,
-                name: true,
-                email: true,
-                xp: true,
-                level:true,
-                createdAt: true
+        const goal = await prisma.goal.findFirst({ where: { id: Number(goalId) } });
+        if (!goal) return;
+
+        // Save to history
+        await prisma.goalHistory.create({
+            data: {
+                userId,
+                targetValue: goal.targetValue,
+                completedAt: new Date()
             }
         });
 
-        const levelInfo = calculateLevel(user.xp);
-
-        res.json({
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                totalXP: user.level,
-                xpToNextLevel: levelInfo.xpToNextLevel,
-                memberSince: user.createdAt
+        // Reset goal
+        await prisma.goal.update({
+            where: { id: goalId },
+            data: {
+                currentValue: 0,
+                cycleStartAt: new Date()
             }
         });
+    } catch (error) {
+        console.error('Save goal to history error:', error);
+    }
+};
+// Get user stats (total workouts, XP, level, etc.)
+const getUserStats = async (req, res) => {
+    try {
+        const userId = Number(req.user.id);
         
+        // Total workouts count
+        const totalWorkouts = await Workout.countDocuments({ userId: String(userId) });
+        
+        // Total duration
+        const workouts = await Workout.find({ userId: String(userId) });
+        const totalDuration = workouts.reduce((sum, w) => sum + Number(w.duration), 0);
+        
+        // Total calories
+        const totalCalories = workouts.reduce((sum, w) => sum + Number(w.calorieBurned || 0), 0);
+        
+        // User info
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { xp: true, level: true, name: true }
+        });
+
+        res.status(200).json({
+            totalWorkouts,
+            totalDuration,
+            totalCalories,
+            xp: user?.xp || 0,
+            level: user?.level || 1,
+            name: user?.name || ''
+        });
     } catch (error) {
         console.error('Get user stats error:', error);
-        res.status(500).json({message: 'Server error', error: error.message });
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
 
-const getGoal = async (req, res) => {
+// Get user goal
+const getUserGoal = async (req, res) => {
     try {
-        // User ka latest goal dhundo
+        const userId = Number(req.user.id);
+        
         let goal = await prisma.goal.findFirst({
-            where: { userId: req.user.id },
-            orderBy: { id: 'desc' }
+            where: { userId }
         });
 
-        // Agar koi goal nahi hai, toh ek default goal bana do
+        // Agar goal nahi hai, toh default goal banao
         if (!goal) {
             goal = await prisma.goal.create({
                 data: {
-                    title: "Weekly Workout Goal",
-                    targetValue: 100, // Default 100 mins
+                    userId,
+                    targetValue: 100,
                     currentValue: 0,
-                    userId: req.user.id
+                    cycleStartAt: new Date()
                 }
             });
         }
 
-        res.status(200).json(goal);
+        // ✅ WORKOUT COUNTING HATA DIYA
+        // Goal update logic sirf workoutController.js me hai
+        // currentValue ko override nahi karenge
+
+        // Check if goal achieved
+        const isAchieved = goal.currentValue >= goal.targetValue;
+
+        res.status(200).json({
+            ...goal,
+            achieved: isAchieved
+        });
     } catch (error) {
         console.error('Get goal error:', error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
-
-const updateGoal = async (req, res) => {
+// Update user goal
+// Update user goal
+// Update user goal
+const updateUserGoal = async (req, res) => {
     try {
         const { targetValue } = req.body;
+        const userId = Number(req.user.id);
 
-        let latestGoal = await prisma.goal.findFirst({
-            where: { userId: req.user.id },
-            orderBy: { id: 'desc' }
+        if (!targetValue || targetValue <= 0) {
+            return res.status(400).json({ message: 'Target value must be greater than 0' });
+        }
+
+        let goal = await prisma.goal.findFirst({
+            where: { userId }
         });
 
-        // Agar goal nahi hai, toh pehle create karo
-        if (!latestGoal) {
-            latestGoal = await prisma.goal.create({
+        if (!goal) {
+            goal = await prisma.goal.create({
                 data: {
-                    title: "Weekly Workout Goal",
+                    userId,
                     targetValue: Number(targetValue),
                     currentValue: 0,
-                    userId: req.user.id
+                    cycleStartAt: new Date()
                 }
             });
         } else {
-            // Goal hai, toh update karo
-            latestGoal = await prisma.goal.update({
-                where: { id: latestGoal.id },
+            // Update target value
+            goal = await prisma.goal.update({
+                where: { id: goal.id },
                 data: { targetValue: Number(targetValue) }
             });
+
+            // ✅ CHECK IF GOAL ALREADY ACHIEVED
+            if (goal.currentValue >= goal.targetValue) {
+                console.log("🎯 Goal already achieved! Resetting...");
+                await saveGoalToHistoryAndReset(userId, goal.id);
+                
+                // Fetch updated goal after reset
+                goal = await prisma.goal.findFirst({ where: { userId } });
+            }
         }
 
-        res.status(200).json({ message: "Goal updated successfully", goal: latestGoal });
+        res.status(200).json(goal);
     } catch (error) {
         console.error('Update goal error:', error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
 
+// Get goal history (last 10 goals)
+const getGoalHistory = async (req, res) => {
+    try {
+        const userId = Number(req.user.id);
+        
+        const history = await prisma.goalHistory.findMany({
+            where: { userId },
+            orderBy: { completedAt: 'desc' },
+            take: 10
+        });
 
-module.exports = { getUserStats, getGoal, updateGoal };
+        res.status(200).json(history);
+    } catch (error) {
+        console.error('Get goal history error:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+
+// Save goal to history and reset
+/*
+const saveGoalToHistoryAndReset = async (userId, goalId) => {
+    try {
+        console.log(`🔄 Starting reset for User: ${userId}, Goal ID: ${goalId}`);
+        
+        const goal = await prisma.goal.findFirst({ where: { id: Number(goalId) } });
+        if (!goal) {
+            console.log(" Goal not found in DB for reset");
+            return;
+        }
+
+        // Save to history
+        await prisma.goalHistory.create({
+            data: {
+                userId,
+                targetValue: goal.targetValue,
+                completedAt: new Date()
+            }
+        });
+        console.log("✅ Saved to history");
+
+        // Reset goal
+        await prisma.goal.update({
+            where: { id: goalId },
+            data: {
+                currentValue: 0,
+                cycleStartAt: new Date() // ✅ Ye line sabse zaroori hai
+            }
+        });
+        console.log("🔄 Goal reset to 0 and cycleStartAt updated");
+
+    } catch (error) {
+        console.error('❌ Save goal to history error:', error);
+    }
+};
+*/
+
+module.exports = { getUserStats,getUserGoal, updateUserGoal, getGoalHistory, saveGoalToHistoryAndReset };
