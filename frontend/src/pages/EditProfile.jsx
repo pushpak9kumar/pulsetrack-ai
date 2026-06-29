@@ -37,7 +37,6 @@ const EditProfile = () => {
             
             await api.put('/profile', payload);
             await fetchProfile();
-            
             toast.success('Profile updated successfully! ✨');
             navigate('/dashboard');
         } catch (error) {
@@ -83,12 +82,12 @@ const EditProfile = () => {
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
             <Navbar />
             
-            <div className="max-w-2xl mx-auto px-4 py-8">
-                <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-8">
+            <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6 sm:mb-8">
                     Edit Profile ✨
                 </h1>
 
-                <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md space-y-6">
+                <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-md space-y-6">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                             Name
@@ -97,7 +96,7 @@ const EditProfile = () => {
                             type="text"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            className="w-full px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm sm:text-base"
                             required
                         />
                     </div>
@@ -110,7 +109,7 @@ const EditProfile = () => {
                             type="email"
                             value={user?.email || ''}
                             disabled
-                            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400 rounded-lg bg-gray-100 dark:bg-gray-900 cursor-not-allowed"
+                            className="w-full px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400 rounded-lg bg-gray-100 dark:bg-gray-900 cursor-not-allowed text-sm sm:text-base"
                         />
                     </div>
 
@@ -118,13 +117,13 @@ const EditProfile = () => {
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-3">
                             Choose Your Avatar
                         </label>
-                        <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mb-4">
+                        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-4 mb-4">
                             {AVATARS.map((avatar) => (
                                 <button
                                     key={avatar.id}
                                     type="button"
                                     onClick={() => setSelectedAvatar(avatar.id)}
-                                    className={`w-16 h-16 rounded-full bg-gradient-to-br ${avatar.gradient} flex items-center justify-center text-2xl shadow-md transition-all transform hover:scale-110 ${
+                                    className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br ${avatar.gradient} flex items-center justify-center text-xl sm:text-2xl shadow-md transition-all transform hover:scale-110 ${
                                         selectedAvatar === avatar.id
                                             ? 'ring-4 ring-blue-500 ring-offset-2 dark:ring-offset-gray-800 scale-110'
                                             : ''
@@ -150,7 +149,7 @@ const EditProfile = () => {
                                 type="button"
                                 onClick={() => fileInputRef.current?.click()}
                                 disabled={uploading}
-                                className="w-full px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:border-blue-500 hover:text-blue-500 transition disabled:opacity-50"
+                                className="w-full px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:border-blue-500 hover:text-blue-500 transition disabled:opacity-50 text-sm sm:text-base"
                             >
                                 {uploading ? 'Uploading...' : '📸 Click to Upload Photo (Max 5MB)'}
                             </button>
@@ -159,26 +158,26 @@ const EditProfile = () => {
                                     <img 
                                         src={`http://localhost:5000${user.avatarUrl}`} 
                                         alt="Current avatar"
-                                        className="w-16 h-16 rounded-full object-cover"
+                                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover"
                                     />
-                                    <p className="text-sm text-gray-600 dark:text-gray-300">Current custom photo</p>
+                                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Current custom photo</p>
                                 </div>
                             )}
                         </div>
                     </div>
 
-                    <div className="flex gap-3">
+                    <div className="flex flex-col sm:flex-row gap-3">
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition disabled:opacity-50"
+                            className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2.5 sm:py-3 rounded-lg font-semibold hover:shadow-lg transition disabled:opacity-50 text-sm sm:text-base"
                         >
                             {loading ? 'Saving...' : 'Save Changes'}
                         </button>
                         <button
                             type="button"
                             onClick={() => navigate('/dashboard')}
-                            className="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+                            className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition text-sm sm:text-base"
                         >
                             Cancel
                         </button>

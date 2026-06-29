@@ -23,9 +23,9 @@ const Login = () => {
             const response = await api.post('/auth/login', formData);
             const { token, user } = response.data;
             
-            console.log("Login response received!"); // ✅ Ye line add kar
-        console.log("Token from backend:", token);
-        console.log("User from backend:", user);
+            console.log("Login response received!");
+            console.log("Token from backend:", token);
+            console.log("User from backend:", user);
 
             login(user, token);
             toast.success('Login successful! 🎉');
@@ -38,44 +38,45 @@ const Login = () => {
                            'Invalid email or password. Please try again.';
             
             toast.error(message);
-            
-            // Form clear mat karo - user ko apna data dikhna chahiye
-            // setFormData({ email: '', password: '' });
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
-            <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
-                <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300 px-4 py-8">
+            <div className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-md transition-colors duration-300">
+                <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-800 dark:text-gray-100 mb-6">
                     Welcome Back! 👋
                 </h2>
                 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                            Email
+                        </label>
                         <input
                             type="email"
                             name="email"
                             value={formData.email}
                             onChange={handleChange}
                             required
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                             placeholder="your@email.com"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                            Password
+                        </label>
                         <input
                             type="password"
                             name="password"
                             value={formData.password}
                             onChange={handleChange}
                             required
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                             placeholder="••••••••"
                         />
                     </div>
@@ -83,15 +84,15 @@ const Login = () => {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50"
+                        className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2.5 sm:py-3 rounded-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50 text-sm sm:text-base"
                     >
                         {loading ? 'Logging in...' : 'Login'}
                     </button>
                 </form>
 
-                <p className="text-center mt-6 text-gray-600">
+                <p className="text-center mt-6 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
                     Don't have an account?{' '}
-                    <Link to="/register" className="text-blue-600 font-semibold hover:underline">
+                    <Link to="/register" className="text-blue-600 dark:text-blue-400 font-semibold hover:underline">
                         Register here
                     </Link>
                 </p>

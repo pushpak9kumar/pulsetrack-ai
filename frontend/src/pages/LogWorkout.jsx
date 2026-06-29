@@ -5,7 +5,6 @@ import api from '../services/api';
 import toast from 'react-hot-toast';
 import Navbar from '../components/Navbar';
 
-// ✅ Component shuru (Dhyan de: yahan '{' bracket hai)
 const LogWorkout = () => {
     const [formData, setFormData] = useState({
         exerciseName: '',
@@ -22,10 +21,9 @@ const LogWorkout = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-        const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // 1. Validation
         if (!formData.exerciseName || !formData.duration) {
             toast.error('Exercise Name and Duration are required!');
             return;
@@ -34,7 +32,6 @@ const LogWorkout = () => {
         setLoading(true);
 
         try {
-            
             const payload = {
                 type: formData.exerciseName,       
                 duration: Number(formData.duration), 
@@ -42,7 +39,6 @@ const LogWorkout = () => {
                 notes: formData.notes || ""
             };
 
-            // 3. Backend ko fixed payload bhejo
             const response = await api.post('/workouts', payload);
             
             toast.success('Workout logged successfully! 🎉');
@@ -57,66 +53,76 @@ const LogWorkout = () => {
     };
     
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
             <Navbar />
             
-            <div className="max-w-2xl mx-auto px-4 py-10">
-                <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Log Your Workout 🏋️‍♂️</h2>
+            <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6 text-center">
+                    Log Your Workout 🏋️‍♂️
+                </h2>
                 
-                <form onSubmit={handleSubmit} className="bg-white p-8 rounded-2xl shadow-lg space-y-6">
+                <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-4 sm:p-6 lg:p-8 rounded-xl sm:rounded-2xl shadow-lg space-y-5 sm:space-y-6 transition-colors duration-300">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Exercise Name</label>
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                            Exercise Name
+                        </label>
                         <input
                             type="text"
                             name="exerciseName"
                             value={formData.exerciseName}
                             onChange={handleChange}
                             placeholder="e.g., Running, Pushups, Yoga"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                            className="w-full px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm sm:text-base"
                         />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Duration (mins)</label>
+                            <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                                Duration (mins)
+                            </label>
                             <input
                                 type="number"
                                 name="duration"
                                 value={formData.duration}
                                 onChange={handleChange}
                                 placeholder="30"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm sm:text-base"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Calories Burned</label>
+                            <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                                Calories Burned
+                            </label>
                             <input
                                 type="number"
                                 name="calories"
                                 value={formData.calories}
                                 onChange={handleChange}
                                 placeholder="250"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm sm:text-base"
                             />
                         </div>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                            Notes (Optional)
+                        </label>
                         <textarea
                             name="notes"
                             value={formData.notes}
                             onChange={handleChange}
                             rows="3"
                             placeholder="How did you feel? Any personal records?"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                            className="w-full px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none text-sm sm:text-base"
                         ></textarea>
                     </div>
 
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-gradient-to-r from-green-500 to-blue-600 text-white py-3 rounded-lg font-bold text-lg hover:shadow-lg transition-all disabled:opacity-50"
+                        className="w-full bg-gradient-to-r from-green-500 to-blue-600 text-white py-2.5 sm:py-3 rounded-lg font-bold text-base sm:text-lg hover:shadow-lg transition-all disabled:opacity-50"
                     >
                         {loading ? 'Saving...' : 'Log Workout'}
                     </button>
@@ -125,6 +131,5 @@ const LogWorkout = () => {
         </div>
     );
 };
-
 
 export default LogWorkout;

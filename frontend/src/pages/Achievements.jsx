@@ -31,12 +31,12 @@ const Achievements = () => {
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
             <Navbar />
             
-            <div className="max-w-4xl mx-auto px-4 py-8">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+                <div className="mb-6 sm:mb-8">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                         🏆 Achievements
                     </h1>
-                    <p className="text-gray-600 dark:text-gray-400">
+                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                         {unlockedCount} of {totalCount} badges unlocked
                     </p>
                 </div>
@@ -44,30 +44,30 @@ const Achievements = () => {
                 {loading ? (
                     <div className="text-center py-12">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-                        <p className="mt-4 text-gray-600 dark:text-gray-400">Loading achievements...</p>
+                        <p className="mt-4 text-gray-600 dark:text-gray-400 text-sm sm:text-base">Loading achievements...</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         {achievements.map((achievement) => (
                             <div
                                 key={achievement.type}
-                                className={`p-6 rounded-xl shadow-md transition-all transform hover:scale-105 ${
+                                className={`p-4 sm:p-6 rounded-xl shadow-md transition-all transform hover:scale-105 ${
                                     achievement.unlocked
                                         ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white'
                                         : 'bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-600'
                                 }`}
                             >
-                                <div className="text-5xl mb-4 text-center">
+                                <div className="text-4xl sm:text-5xl mb-3 sm:mb-4 text-center">
                                     {achievement.unlocked ? achievement.icon : '🔒'}
                                 </div>
                                 
-                                <h3 className={`text-xl font-bold mb-2 text-center ${
+                                <h3 className={`text-lg sm:text-xl font-bold mb-2 text-center ${
                                     achievement.unlocked ? 'text-white' : 'text-gray-800 dark:text-gray-200'
                                 }`}>
                                     {achievement.name}
                                 </h3>
                                 
-                                <p className={`text-sm text-center mb-4 ${
+                                <p className={`text-xs sm:text-sm text-center mb-3 sm:mb-4 ${
                                     achievement.unlocked ? 'text-white/90' : 'text-gray-600 dark:text-gray-400'
                                 }`}>
                                     {achievement.description}
@@ -75,7 +75,7 @@ const Achievements = () => {
                                 
                                 {achievement.unlocked ? (
                                     <div className="text-center">
-                                        <span className="inline-block px-3 py-1 bg-white/20 rounded-full text-xs font-semibold">
+                                        <span className="inline-block px-2.5 sm:px-3 py-1 bg-white/20 rounded-full text-xs font-semibold">
                                             ✅ Unlocked
                                         </span>
                                         <p className="text-xs mt-2 text-white/70">
@@ -84,7 +84,7 @@ const Achievements = () => {
                                     </div>
                                 ) : (
                                     <div className="text-center">
-                                        <span className="inline-block px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-full text-xs font-semibold">
+                                        <span className="inline-block px-2.5 sm:px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-full text-xs font-semibold">
                                             🔒 Locked
                                         </span>
                                     </div>
