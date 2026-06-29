@@ -24,6 +24,14 @@ const EditProfile = () => {
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
 
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [passwordData, setPasswordData] = useState({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+    });
+    const [changingPassword, setChangingPassword] = useState(false);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -75,6 +83,41 @@ const EditProfile = () => {
             console.error(error);
         } finally {
             setUploading(false);
+        }
+    };
+    
+    const handlePasswordChange = async (e) => {
+        e.preventDefault();
+        
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            toast.error('New passwords do not match');
+            return;
+        }
+
+        if (passwordData.newPassword.length < 6) {
+            toast.error('Password must be at least 6 characters');
+            return;
+        }
+
+        setChangingPassword(true);
+
+        try {
+            await api.put('/profile/change-password', {
+                currentPassword: passwordData.currentPassword,
+                newPassword: passwordData.newPassword
+            });
+            
+            toast.success('Password changed successfully! 🔒');
+            setShowPasswordModal(false);
+            setPasswordData({
+                currentPassword: '',
+                newPassword: '',
+                confirmPassword: ''
+            });
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to change password');
+        } finally {
+            setChangingPassword(false);
         }
     };
 
@@ -174,6 +217,15 @@ const EditProfile = () => {
                         >
                             {loading ? 'Saving...' : 'Save Changes'}
                         </button>
+
+                        <button
+                            type="button"
+                            onClick={() => setShowPasswordModal(true)}
+                            className="w-full px-4 py-2.5 sm:py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition text-sm sm:text-base"
+                        >
+                            🔒 Change Password
+                        </button>
+
                         <button
                             type="button"
                             onClick={() => navigate('/dashboard')}
@@ -183,6 +235,90 @@ const EditProfile = () => {
                         </button>
                     </div>
                 </form>
+
+                {/* Password Change Modal */}
+                {showPasswordModal && (
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+                        <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl max-w-md w-full transition-colors duration-300">
+                            {/* Modal Header */}
+                            <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-4 sm:p-6 text-white rounded-t-xl sm:rounded-t-2xl">
+                                <div className="flex justify-between items-center">
+                                    <h3 className="text-lg sm:text-xl font-bold flex items-center gap-2">
+                                        🔒 Change Password
+                                    </h3>
+                                    <button
+                                        onClick={() => setShowPasswordModal(false)}
+                                        className="text-white hover:bg-white/20 p-1.5 rounded-full transition"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Modal Body */}
+                            <form onSubmit={handlePasswordChange} className="p-4 sm:p-6 space-y-4">
+                                <div>
+                                    <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                                        Current Password
+                                    </label>
+                                    <input
+                                        type="password"
+                                        value={passwordData.currentPassword}
+                                        onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                                        required
+                                        className="w-full px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                                        placeholder="Enter current password"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                                        New Password
+                                    </label>
+                                    <input
+                                        type="password"
+                                        value={passwordData.newPassword}
+                                        onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                                        required
+                                        className="w-full px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                                        placeholder="Enter new password (min 6 chars)"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                                        Confirm New Password
+                                    </label>
+                                    <input
+                                        type="password"
+                                        value={passwordData.confirmPassword}
+                                        onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                                        required
+                                        className="w-full px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                                        placeholder="Confirm new password"
+                                    />
+                                </div>
+
+                                <div className="flex gap-3 pt-2">
+                                    <button
+                                        type="submit"
+                                        disabled={changingPassword}
+                                        className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2.5 rounded-lg font-semibold hover:shadow-lg transition disabled:opacity-50 text-sm sm:text-base"
+                                    >
+                                        {changingPassword ? 'Changing...' : 'Change Password'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPasswordModal(false)}
+                                        className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-2.5 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition text-sm sm:text-base"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

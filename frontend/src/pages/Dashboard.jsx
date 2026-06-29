@@ -310,6 +310,18 @@ useEffect(() => {
     }
 }, [level, previousLevel]);
 
+   // Helper function for inline markdown (bold, italic)
+const formatInlineMarkdown = (text) => {
+    // Bold text: **text**
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+    return parts.map((part, i) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+            return <strong key={i} className="font-semibold text-gray-800 dark:text-gray-100">{part.replace(/\*\*/g, '')}</strong>;
+        }
+        return part;
+    });
+};
+
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
             <Navbar />
@@ -592,70 +604,101 @@ useEffect(() => {
                 </div>
             </div>
             
-            {/* AI FEEDBACK MODAL */}
-            {showAIModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] sm:max-h-[80vh] overflow-hidden transition-colors duration-300">
-                        {/* Modal Header */}
-                        <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-4 sm:p-6 text-white">
-                            <div className="flex justify-between items-center">
-                                <div className="flex-1 min-w-0 pr-2">
-                                    <h3 className="text-lg sm:text-2xl font-bold flex items-center gap-2">
-                                        🤖 AI Coach Feedback
-                                    </h3>
-                                    {selectedWorkout && (
-                                        <p className="text-xs sm:text-sm opacity-90 mt-1 truncate">
-                                            {selectedWorkout.type} • {selectedWorkout.duration} mins
-                                        </p>
-                                    )}
-                                </div>
-                                <button
-                                    onClick={closeAIModal}
-                                    className="text-white hover:bg-white/20 p-1.5 sm:p-2 rounded-full transition flex-shrink-0"
-                                >
-                                    ✕
-                                </button>
-                            </div>
-                        </div>
-                        
-                        {/* Modal Body */}
-                        <div className="p-4 sm:p-6 overflow-y-auto max-h-[50vh] sm:max-h-[60vh]">
-                            {loadingAI ? (
-                                <div className="flex flex-col items-center justify-center py-8 sm:py-12">
-                                    <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-t-4 border-purple-500 mb-4"></div>
-                                    <p className="text-gray-600 dark:text-gray-300 font-semibold text-sm sm:text-base text-center">AI Coach is analyzing your workout...</p>
-                                    <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-2">This may take a few seconds</p>
-                                </div>
-                            ) : (
-                                <div className="prose prose-sm max-w-none">
-                                    {aiFeedback.split('\n').map((line, index) => {
-                                        if (line.startsWith('**') && line.endsWith('**')) {
-                                            return <h4 key={index} className="text-base sm:text-lg font-bold text-gray-800 dark:text-gray-100 mt-4 mb-2">{line.replace(/\*\*/g, '')}</h4>;
-                                        }
-                                        if (line.trim().startsWith('-') || line.trim().startsWith('•')) {
-                                            return <p key={index} className="text-gray-700 dark:text-gray-200 ml-4 mb-1 text-sm sm:text-base">{line}</p>;
-                                        }
-                                        if (line.trim() === '') {
-                                            return <br key={index} />;
-                                        }
-                                        return <p key={index} className="text-gray-700 dark:text-gray-200 mb-2 text-sm sm:text-base">{line}</p>;
-                                    })}
-                                </div>
-                            )}
-                        </div>
-                        
-                        {/* Modal Footer */}
-                        <div className="border-t border-gray-200 dark:border-gray-700 p-3 sm:p-4 bg-gray-50 dark:bg-gray-900">
-                            <button
-                                onClick={closeAIModal}
-                                className="w-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-2 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition text-sm sm:text-base"
-                            >
-                                Close
-                            </button>
-                        </div>
-                    </div>
+           {/* AI FEEDBACK MODAL */}
+{showAIModal && (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] sm:max-h-[80vh] overflow-hidden transition-colors duration-300">
+           {/* Modal Header */}
+<div className="bg-gradient-to-r from-purple-500 to-pink-500 p-4 sm:p-6 text-white">
+    <div className="flex justify-between items-start">
+        <div className="flex-1 min-w-0 pr-2">
+            <h3 className="text-lg sm:text-2xl font-bold flex items-center gap-2">
+                🤖 AI Coach Feedback
+            </h3>
+            {selectedWorkout && (
+                <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs sm:text-sm">
+                    <span className="font-semibold capitalize">{selectedWorkout.type}</span>
+                    <span>•</span>
+                    <span>{selectedWorkout.duration} mins</span>
                 </div>
             )}
+        </div>
+        <button
+            onClick={closeAIModal}
+            className="text-white hover:bg-white/20 p-1.5 sm:p-2 rounded-full transition flex-shrink-0"
+        >
+            ✕
+        </button>
+    </div>
+</div>
+            
+            {/* Modal Body */}
+            <div className="p-4 sm:p-6 overflow-y-auto max-h-[50vh] sm:max-h-[60vh]">
+                {loadingAI ? (
+                    <div className="flex flex-col items-center justify-center py-8 sm:py-12">
+                        <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-t-4 border-purple-500 mb-4"></div>
+                        <p className="text-gray-600 dark:text-gray-300 font-semibold text-sm sm:text-base text-center">AI Coach is analyzing your workout...</p>
+                        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-2">This may take a few seconds</p>
+                    </div>
+                ) : (
+                    <div className="prose prose-sm sm:prose-base max-w-none dark:prose-invert">
+                        {aiFeedback.split('\n').map((line, index) => {
+                            // Headings (## or **)
+                            if (line.startsWith('## ')) {
+                                return <h2 key={index} className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mt-6 mb-3 border-b border-gray-200 dark:border-gray-700 pb-2">{line.replace('## ', '')}</h2>;
+                            }
+                            if (line.startsWith('**') && line.endsWith('**')) {
+                                return <h3 key={index} className="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mt-4 mb-2">{line.replace(/\*\*/g, '')}</h3>;
+                            }
+                            
+                            // Bullet points
+                            if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
+                                const content = line.trim().substring(2);
+                                return (
+                                    <div key={index} className="flex items-start gap-2 ml-4 mb-2">
+                                        <span className="text-purple-500 dark:text-purple-400 mt-1">•</span>
+                                        <p className="text-gray-700 dark:text-gray-200 text-sm sm:text-base flex-1">{formatInlineMarkdown(content)}</p>
+                                    </div>
+                                );
+                            }
+                            
+                            // Numbered lists
+                            if (line.trim().match(/^\d+\.\s/)) {
+                                const match = line.trim().match(/^(\d+)\.\s(.*)$/);
+                                if (match) {
+                                    return (
+                                        <div key={index} className="flex items-start gap-2 ml-4 mb-2">
+                                            <span className="text-purple-500 dark:text-purple-400 font-semibold mt-0.5">{match[1]}.</span>
+                                            <p className="text-gray-700 dark:text-gray-200 text-sm sm:text-base flex-1">{formatInlineMarkdown(match[2])}</p>
+                                        </div>
+                                    );
+                                }
+                            }
+                            
+                            // Empty lines
+                            if (line.trim() === '') {
+                                return <div key={index} className="h-2"></div>;
+                            }
+                            
+                            // Regular paragraphs
+                            return <p key={index} className="text-gray-700 dark:text-gray-200 mb-3 text-sm sm:text-base leading-relaxed">{formatInlineMarkdown(line)}</p>;
+                        })}
+                    </div>
+                )}
+            </div>
+            
+            {/* Modal Footer */}
+            <div className="border-t border-gray-200 dark:border-gray-700 p-3 sm:p-4 bg-gray-50 dark:bg-gray-900">
+                <button
+                    onClick={closeAIModal}
+                    className="w-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-2 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition text-sm sm:text-base"
+                >
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+)}
         </div>
     );
 };
