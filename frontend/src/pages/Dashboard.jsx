@@ -57,7 +57,7 @@ const Dashboard = () => {
         }
     };
 
-    const fetchUserGoal = async () => {
+   const fetchUserGoal = async () => {
     try {
         const response = await api.get('/users/goal', {
             headers: {
@@ -67,15 +67,20 @@ const Dashboard = () => {
         });
         
         console.log("📥 Fetched Goal from Backend:", response.data);
-        setUserGoal(response.data);
-        setGoalInput(response.data.targetValue);
         
         if (response.data.achieved) {
             toast.success('🎉 Weekly Goal Achieved! Great job!');
         }
+        
+        setUserGoal({
+            targetValue: response.data.targetValue,
+            currentValue: response.data.currentValue,
+            title: response.data.title
+        });
+        setGoalInput(response.data.targetValue);
     } catch (error) {
         console.error("Failed to fetch goal:", error);
-       }
+    }
 };
 
     const fetchWeightHistory = async () => {
@@ -282,7 +287,7 @@ const calculateLevel = (totalXP) => {
 };
 
 const totalMinutes = workouts.reduce((sum, w) => sum + Number(w.duration), 0);
-const progressPercentage = Math.min((totalMinutes / userGoal.targetValue) * 100, 100);
+const progressPercentage = Math.min((userGoal.currentValue / userGoal.targetValue) * 100, 100);
 const totalXP = calculateXP(workouts);
 const level = calculateLevel(totalXP);
 

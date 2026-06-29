@@ -30,38 +30,50 @@ const getGoal = async (req, res) => {
                     userId: userId,
                     targetValue: 100,
                     currentValue: 0,
-                    title: "Weekly Goal"
+                    title: "Weekly Goal",
+                    cycleStartAt: new Date()
                 }
             });
         }
 
+        // ✅ Sirf cycleStartAt ke baad ke workouts count karo
         const workouts = await prisma.workout.findMany({
-            where: { userId: userId },
+            where: { 
+                userId: userId,
+                createdAt: {
+                    gte: goal.cycleStartAt
+                }
+            },
             orderBy: { createdAt: 'desc' }
         });
 
         const totalMinutes = workouts.reduce((sum, w) => sum + Number(w.duration), 0);
         
-        const updatedGoal = await prisma.goal.update({
+        // ✅ currentValue update karo
+        goal = await prisma.goal.update({
             where: { id: goal.id },
             data: { currentValue: totalMinutes }
         });
 
-        if (updatedGoal.currentValue >= updatedGoal.targetValue && updatedGoal.targetValue > 0) {
-            await trackCompletedGoal(userId, updatedGoal.targetValue);
+        // ✅ Check karo goal achieve hua ya nahi
+        if (totalMinutes >= goal.targetValue && goal.targetValue > 0) {
+            await trackCompletedGoal(userId, goal.targetValue);
             
-            await prisma.goal.update({
+            // ✅ Cycle reset karo - cycleStartAt ko abhi ka time do
+            goal = await prisma.goal.update({
                 where: { id: goal.id },
-                data: { currentValue: 0 }
+                data: { 
+                    currentValue: 0,
+                    cycleStartAt: new Date()
+                }
             });
             
-            updatedGoal.currentValue = 0;
-            updatedGoal.achieved = true;
+            goal.achieved = true;
         } else {
-            updatedGoal.achieved = false;
+            goal.achieved = false;
         }
 
-        res.status(200).json(updatedGoal);
+        res.status(200).json(goal);
     } catch (error) {
         console.error('Get goal error:', error);
         res.status(500).json({ message: 'Server error', error: error.message });
@@ -83,7 +95,8 @@ const updateGoal = async (req, res) => {
                     userId: userId,
                     targetValue: Number(targetValue),
                     currentValue: 0,
-                    title: "Weekly Goal"
+                    title: "Weekly Goal",
+                    cycleStartAt: new Date()
                 }
             });
         } else {
