@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 const Home = () => {
     const { isAuthenticated, user } = useAuth();
 
-    // Daily Motivational Quotes Array (365 quotes for each day)
+    // Daily Motivational Quotes
     const quotes = [
         { text: "The only bad workout is the one that didn't happen.", author: "Unknown" },
         { text: "Your body can stand almost anything. It's your mind you have to convince.", author: "Andrew Murphy" },
@@ -55,11 +55,11 @@ const Home = () => {
         { text: "The best time to plant a tree was 20 years ago. The second best time is now.", author: "Chinese Proverb" },
         { text: "Success is the sum of small efforts repeated day in and day out.", author: "Robert Collier" },
         { text: "The harder you work for something, the greater you'll feel when you achieve it.", author: "Unknown" },
-        { text: "Don't stop when you're tired. Stop when you're done.", author: "Unknown" },
         { text: "Dream big. Start small. Act now.", author: "Robin Sharma" },
+        { text: "No pain, no gain. Shut up and train.", author: "Unknown" },
     ];
 
-    // Get today's quote based on day of the year
+    // Get today's quote
     const getTodayQuote = () => {
         const now = new Date();
         const start = new Date(now.getFullYear(), 0, 0);
@@ -70,6 +70,46 @@ const Home = () => {
     };
 
     const todayQuote = getTodayQuote();
+
+    // Athletes Gallery Data
+    const athletes = [
+        {
+            image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80",
+            title: "Strength Training",
+            subtitle: "Build Your Power",
+            quote: "Strength does not come from the body. It comes from the will."
+        },
+        {
+            image: "https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=800&q=80",
+            title: "Running",
+            subtitle: "Push Your Limits",
+            quote: "Run when you can, walk if you have to, crawl if you must; just never give up."
+        },
+        {
+            image: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80",
+            title: "Yoga & Flexibility",
+            subtitle: "Find Your Balance",
+            quote: "Yoga is the journey of the self, through the self, to the self."
+        },
+        {
+            image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80",
+            title: "Gym Workout",
+            subtitle: "No Excuses",
+            quote: "The only bad workout is the one that didn't happen."
+        },
+        {
+            image: "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80",
+            title: "Cardio Fitness",
+            subtitle: "Heart of a Champion",
+            quote: "Take care of your body. It's the only place you have to live."
+        },
+        {
+            image: "https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=800&q=80",
+            title: "Boxing",
+            subtitle: "Fight For Your Goals",
+            quote: "Champions aren't made in gyms. They are made from something deep inside them."
+        },
+    ];
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
@@ -134,7 +174,6 @@ const Home = () => {
             {/* Features Section */}
             <div className="py-16 sm:py-20 bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    {/* Section Header */}
                     <div className="text-center mb-12 sm:mb-16">
                         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 dark:text-gray-100 mb-4">
                             Why Choose PulseTrack AI?
@@ -144,7 +183,6 @@ const Home = () => {
                         </p>
                     </div>
 
-                    {/* Features Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
                         {/* Feature 1: AI Coach */}
                         <div className="group bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
@@ -192,23 +230,133 @@ const Home = () => {
                         </div>
                     </div>
 
-                    {/* Call to Action */}
+                    {/* ✅ FIXED: Conditional CTA Button */}
                     <div className="text-center mt-12 sm:mt-16">
-                        <Link 
-                            to="/register"
-                            className="inline-block bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 sm:px-10 py-3 sm:py-4 rounded-xl text-base sm:text-lg font-semibold hover:shadow-2xl transition-all transform hover:scale-105"
-                        >
-                            Start Your Journey Today 🚀
-                        </Link>
+                        {isAuthenticated ? (
+                            <Link 
+                                to="/dashboard"
+                                className="inline-block bg-gradient-to-r from-green-500 to-blue-600 text-white px-8 sm:px-10 py-3 sm:py-4 rounded-xl text-base sm:text-lg font-semibold hover:shadow-2xl transition-all transform hover:scale-105"
+                            >
+                                Go to Your Dashboard 📊
+                            </Link>
+                        ) : (
+                            <Link 
+                                to="/register"
+                                className="inline-block bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 sm:px-10 py-3 sm:py-4 rounded-xl text-base sm:text-lg font-semibold hover:shadow-2xl transition-all transform hover:scale-105"
+                            >
+                                Start Your Journey Today 🚀
+                            </Link>
+                        )}
                     </div>
                 </div>
             </div>
 
+            {/* Athletes Gallery Section */}
+            <div className="py-16 sm:py-20 bg-white dark:bg-gray-800 transition-colors duration-300">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-12 sm:mb-16">
+                        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+                            Find Your Inspiration 🔥
+                        </h2>
+                        <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                            Join thousands of athletes who transformed their lives with PulseTrack AI
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                        {athletes.map((athlete, index) => (
+                            <div 
+                                key={index}
+                                className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 cursor-pointer"
+                            >
+                                <div className="aspect-[4/5] overflow-hidden">
+                                    <img 
+                                        src={athlete.image} 
+                                        alt={athlete.title}
+                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                        loading="lazy"
+                                    />
+                                </div>
+
+                                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-80 group-hover:opacity-95 transition-opacity duration-300"></div>
+
+                                <div className="absolute inset-0 flex flex-col justify-end p-5 sm:p-6 text-white">
+                                    <div className="transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                                        <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold mb-2">
+                                            {athlete.subtitle}
+                                        </span>
+                                        <h3 className="text-xl sm:text-2xl font-bold mb-2">
+                                            {athlete.title}
+                                        </h3>
+                                        <p className="text-xs sm:text-sm italic opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100 leading-relaxed">
+                                            "{athlete.quote}"
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* ✅ FIXED: Conditional CTA Button */}
+                {/*}    <div className="text-center mt-12 sm:mt-16">
+                        {isAuthenticated ? (
+                            <Link 
+                                to="/dashboard"
+                                className="inline-block bg-gradient-to-r from-green-500 to-blue-600 text-white px-8 sm:px-10 py-3 sm:py-4 rounded-xl text-base sm:text-lg font-semibold hover:shadow-2xl transition-all transform hover:scale-105"
+                            >
+                                Continue Your Journey 🚀
+                            </Link>
+                        ) : (
+                            <Link 
+                                to="/register"
+                                className="inline-block bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 sm:px-10 py-3 sm:py-4 rounded-xl text-base sm:text-lg font-semibold hover:shadow-2xl transition-all transform hover:scale-105"
+                            >
+                                Start Your Journey Today 🚀
+                            </Link>
+                        )}
+                    </div>
+            */}
+                    
+                </div>
+            </div>
+            
+
+            {/* Stats Section - Hardcoded for now */}
+<div className="py-12 sm:py-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center">
+            <div>
+                <div className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2">
+                    200+
+                </div>
+                <div className="text-xs sm:text-sm opacity-90">Active Users</div>
+            </div>
+            <div>
+                <div className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2">
+                    1.5K+
+                </div>
+                <div className="text-xs sm:text-sm opacity-90">Workouts Logged</div>
+            </div>
+            <div>
+                <div className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2">
+                    50+
+                </div>
+                <div className="text-xs sm:text-sm opacity-90">Badges Unlocked</div>
+            </div>
+            <div>
+                <div className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2">
+                    24/7
+                </div>
+                <div className="text-xs sm:text-sm opacity-90">AI Support</div>
+            </div>
+        </div>
+    </div>
+</div>
             {/* Footer */}
             <footer className="bg-gray-800 dark:bg-gray-900 text-white py-8 transition-colors duration-300">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <p className="text-sm sm:text-base">
-                        © 2024 PulseTrack AI. Transform your fitness journey with AI-powered coaching.
+                        © 2026 PulseTrack AI. Transform your fitness journey with AI-powered coaching.
                     </p>
                 </div>
             </footer>
