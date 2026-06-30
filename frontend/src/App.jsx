@@ -11,6 +11,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Achievements from './pages/Achievements';
+import WorkoutHistory from './pages/WorkoutHistory';
 
 function App() {
     return (
@@ -51,7 +52,13 @@ function App() {
                             <Achievements />
                         </ProtectedRoute>
                     } />
-                    
+
+                    <Route path="/workout-history" element={
+                        <ProtectedRoute>
+                            <WorkoutHistory />
+                        </ProtectedRoute>
+                    } />
+
                 </Routes>
             </Router>
          </AuthProvider>

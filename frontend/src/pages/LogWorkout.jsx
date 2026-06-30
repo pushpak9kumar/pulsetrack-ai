@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom'; // ✅ Link import add kiya
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import toast from 'react-hot-toast';
@@ -16,6 +16,20 @@ const LogWorkout = () => {
     
     const { token } = useAuth(); 
     const navigate = useNavigate();
+    
+    useEffect(() => {
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                navigate('/dashboard');
+            }
+        };
+        
+        window.addEventListener('keydown', handleEscape);
+        
+        return () => {
+            window.removeEventListener('keydown', handleEscape);
+        };
+    }, [navigate]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -119,13 +133,25 @@ const LogWorkout = () => {
                         ></textarea>
                     </div>
 
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full bg-gradient-to-r from-green-500 to-blue-600 text-white py-2.5 sm:py-3 rounded-lg font-bold text-base sm:text-lg hover:shadow-lg transition-all disabled:opacity-50"
-                    >
-                        {loading ? 'Saving...' : 'Log Workout'}
-                    </button>
+                    {/* ✅ BUTTONS CONTAINER - Cancel + Submit */}
+                    <div className="flex gap-3 pt-2">
+                        {/* Cancel Button */}
+                        <Link 
+                            to="/dashboard"
+                            className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 py-2.5 sm:py-3 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition text-center text-base sm:text-lg"
+                        >
+                            Cancel
+                        </Link>
+                        
+                        {/* Submit Button */}
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="flex-1 bg-gradient-to-r from-green-500 to-blue-600 text-white py-2.5 sm:py-3 rounded-lg font-bold text-base sm:text-lg hover:shadow-lg transition-all disabled:opacity-50"
+                        >
+                            {loading ? 'Saving...' : 'Log Workout'}
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

@@ -218,6 +218,21 @@ const Navbar = () => {
                                                 </svg>
                                                 Achievements
                                             </button>
+                                            
+                                            {/* Workout History Button - Dashboard se upar add kar */}
+                                           <button 
+                                              onClick={() => {
+                                              navigate('/workout-history');
+                                              setIsDropdownOpen(false);
+                                              }}
+                                              className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition flex items-center gap-2"
+>
+                                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                               </svg>
+                                               Workout History (10 Days)
+                                           </button>
+
 
                                             <button 
                                                 onClick={() => {
@@ -312,6 +327,19 @@ const Navbar = () => {
                                             </svg>
                                             Achievements
                                         </button>
+                                        
+                                        <button 
+                                           onClick={() => {
+                                               navigate('/workout-history');
+                                               setIsMobileMenuOpen(false);
+                                           }}
+                                           className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition flex items-center gap-2"
+>
+                                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                                               <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                             </svg>
+                                           Workout History (10 Days)
+                                       </button>
 
                                         <button 
                                             onClick={() => {

@@ -13,6 +13,7 @@ const Dashboard = () => {
 
     // 1. STATE MANAGEMENT
     const [workouts, setWorkouts] = useState([]);
+    const [recentWorkouts, setRecentWorkouts] = useState([]);
     const [loadingWorkouts, setLoadingWorkouts] = useState(true);
 
     // GOAL STATES 
@@ -39,27 +40,40 @@ const [goalInput, setGoalInput] = useState('');
     const [currentBmi, setCurrentBmi] = useState(null);
 
     // 2. DATA FETCHING FUNCTION
-    const fetchWorkouts = async () => {
-        try {
-            const response = await api.get('/workouts');
-            
-            let fetchedWorkouts = [];
-            if (Array.isArray(response.data)) {
-                fetchedWorkouts = response.data;
-            } else if (response.data && Array.isArray(response.data.workouts)) {
-                fetchedWorkouts = response.data.workouts;
-            } else if (response.data && Array.isArray(response.data.data)) {
-                fetchedWorkouts = response.data.data;
-            }
-
-            setWorkouts(fetchedWorkouts);
-        } catch (error) {
-            console.error("Failed to fetch workouts:", error);
-            setWorkouts([]);
-        } finally {
-            setLoadingWorkouts(false);
+   const fetchWorkouts = async () => {
+    try {
+        // ✅ Sab workouts fetch karo (stats aur charts ke liye)
+        const response = await api.get('/workouts');
+        
+        let fetchedWorkouts = [];
+        if (Array.isArray(response.data)) {
+            fetchedWorkouts = response.data;
+        } else if (response.data && Array.isArray(response.data.workouts)) {
+            fetchedWorkouts = response.data.workouts;
+        } else if (response.data && Array.isArray(response.data.data)) {
+            fetchedWorkouts = response.data.data;
         }
-    };
+
+        setWorkouts(fetchedWorkouts); // All workouts for stats/charts
+        
+        // ✅ Sirf last 2 days ke workouts filter karo display ke liye
+        const twoDaysAgo = new Date();
+        twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+        
+        const recentOnly = fetchedWorkouts.filter(w => 
+            new Date(w.createdAt) >= twoDaysAgo
+        );
+        
+        setRecentWorkouts(recentOnly); // Only 2 days for display
+        
+    } catch (error) {
+        console.error("Failed to fetch workouts:", error);
+        setWorkouts([]);
+        setRecentWorkouts([]);
+    } finally {
+        setLoadingWorkouts(false);
+    }
+};
 
    const fetchUserGoal = async () => {
     try {
@@ -323,15 +337,21 @@ const level = calculateLevel(totalXP);
 
 const [previousLevel, setPreviousLevel] = useState(level);
 
-useEffect(() => {
-    if (level > previousLevel) {
-        toast.success(`🎉 Level Up! You are now Level ${level}!`, {
-            duration: 4000,
-            icon: '🚀'
-        });
-        setPreviousLevel(level);
-    }
-}, [level, previousLevel]);
+    useEffect(() => {
+        // 1. Browser se check karo ki last baar kaunsa level show kiya tha
+        const lastShownLevel = Number(localStorage.getItem('lastShownLevel')) || 1;
+
+        // 2. Agar current level, last shown level se bada hai, tabhi popup dikhao
+        if (level > lastShownLevel) {
+            toast.success(`🎉 Level Up! You are now Level ${level}!`, {
+                duration: 4000,
+                icon: '🚀'
+            });
+            
+            // 3. Naye level ko browser me save kar do taaki reload pe dobara na dikhe
+            localStorage.setItem('lastShownLevel', level);
+        }
+    }, [level]); // Dependency me sirf 'level' rakho, 'previousLevel' hata do
 
    // Helper function for inline markdown (bold, italic)
 const formatInlineMarkdown = (text) => {
@@ -607,6 +627,19 @@ const formatInlineMarkdown = (text) => {
                         </div>
                     </div>
                 </div>
+                
+                  {/* Log New Workout Button */}
+                <div className="flex justify-center mb-6">
+    <Link 
+        to="/log-workout" 
+        className="w-full max-w-md bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-6 py-3 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
+    >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        Log New Workout
+    </Link>
+</div>
 
                 {/* Workouts List Section */}
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Your Recent Workouts 🏋️‍♂️</h2>
@@ -615,7 +648,7 @@ const formatInlineMarkdown = (text) => {
                     <div className="flex justify-center py-10">
                         <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>
                     </div>
-                ) : workouts.length === 0 ? (
+                ) : recentWorkouts.length === 0 ? (
                     <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-md transition-colors duration-300">
                         <p className="text-gray-500 dark:text-gray-400 text-base sm:text-lg">No workouts logged yet. Start moving! 🏃‍♂️</p>
                         <Link to="/log-workout" className="mt-4 inline-block text-blue-600 dark:text-blue-400 font-semibold hover:underline text-sm sm:text-base">
@@ -624,7 +657,7 @@ const formatInlineMarkdown = (text) => {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                        {workouts.map((workout) => (
+                        {recentWorkouts.map((workout) => (
                             <div key={workout._id} className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-md hover:shadow-lg transition relative transition-colors duration-300">
                                 
                                 {/* DELETE BUTTON */}
@@ -660,15 +693,6 @@ const formatInlineMarkdown = (text) => {
                     </div>
                 )}
 
-                {/* Log New Workout Button */}
-                <div className="flex justify-center mt-8 sm:mt-10">
-                    <Link 
-                        to="/log-workout" 
-                        className="bg-gradient-to-r from-green-500 to-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-lg sm:text-xl font-bold hover:shadow-2xl transition transform hover:scale-105"
-                    >
-                        + Log New Workout
-                    </Link>
-                </div>
             </div>
             
            {/* AI FEEDBACK MODAL */}

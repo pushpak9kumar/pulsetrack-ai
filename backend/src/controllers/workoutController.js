@@ -87,16 +87,19 @@ if (goal) {
 //==========================GET all Workout(for logged in users only) ====================
 const getWorkouts = async (req, res) => {
     try {
-        //finding only those workout in database whose userId matches with current ID
-        const workouts = await Workout.find({ userId: req.user.id }).sort({ date: -1 }); // des order
+        // Agar frontend se days aaya toh wo lega, warna default 2 days
+        const days = req.query.days ? parseInt(req.query.days) : 2; 
+        
+        const pastDate = new Date();
+        pastDate.setDate(pastDate.getDate() - days);
 
-        res.json({
-            count: workouts.length,
-            workouts
-        });
+        const workouts = await Workout.find({
+            userId: req.user.id,
+            createdAt: { $gte: pastDate } 
+        }).sort({ createdAt: -1 });
 
+        res.status(200).json(workouts);
     } catch (error) {
-        console.error('Get workouts error:', error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
