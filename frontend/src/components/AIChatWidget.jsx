@@ -1,15 +1,25 @@
 import { useState, useRef, useEffect } from 'react';
 import api from '../services/api';
-
+import { useAuth } from '../context/AuthContext';
+const AIChatWidgett = () => {
+    console.log("🚀 AIChatWidget is rendering!"); // ✅ Ye add kar
+    
+}
+    // ... baaki code
 const AIChatWidget = () => {
+    const { user } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
    const defaultMessages = [
     { sender: 'ai', text: 'Hi! I am PulseTrack AI Coach. Ask me anything about fitness, diet, or workouts! 💪' }
 ];
 
-// LocalStorage se purani chat load karo, agar nahi hai toh default message dikhao
+// ✅ Har user ke liye unique key banayi
+// ✅ Dono _id aur id ko check karega
+const userId = user?._id || user?.id || 'guest'; 
+const chatStorageKey = `pulsetrack_ai_chat_${userId}`;
+
 const [messages, setMessages] = useState(() => {
-    const savedChat = localStorage.getItem('pulsetrack_ai_chat');
+    const savedChat = localStorage.getItem(chatStorageKey);
     return savedChat ? JSON.parse(savedChat) : defaultMessages;
 });
     const [input, setInput] = useState('');
@@ -23,9 +33,12 @@ const [messages, setMessages] = useState(() => {
     }, [messages]);
 
     // Jab bhi messages change ho, usko LocalStorage me save kar do
+// Jab bhi messages change ho, usko LocalStorage me save kar do
 useEffect(() => {
-    localStorage.setItem('pulsetrack_ai_chat', JSON.stringify(messages));
-}, [messages]);
+    if (userId !== 'guest') {
+        localStorage.setItem(chatStorageKey, JSON.stringify(messages));
+    }
+}, [messages, chatStorageKey, userId]);
 
     // ✅ Naya UseEffect: Click Outside to Close
     useEffect(() => {

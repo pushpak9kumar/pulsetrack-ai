@@ -1,9 +1,13 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 
 const Home = () => {
     const { isAuthenticated, user } = useAuth();
+    const location = useLocation();
+
+    // Check if the user is a new user
+    const isNewUser = location.state?.isNewUser;
 
     // Daily Motivational Quotes
     const quotes = [
@@ -118,7 +122,7 @@ const Home = () => {
             {/* Hero Section */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 text-center">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-800 dark:text-gray-100 mb-4 sm:mb-6">
-                    Transform Your Fitness Journey
+                    {isNewUser ? "Welcome to the Family! Let's Start Your Journey 🚀" : "Transform Your Fitness Journey "}
                 </h1>
                 <p className="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-300 mb-8 sm:mb-10 max-w-2xl mx-auto px-2">
                     AI-powered workout tracking, personalized coaching, and gamification to keep you motivated.

@@ -75,14 +75,15 @@ const getUserGoal = async (req, res) => {
 
         // Agar goal nahi hai, toh default goal banao
         if (!goal) {
-            goal = await prisma.goal.create({
-                data: {
-                    userId,
-                    targetValue: 100,
-                    currentValue: 0,
-                    cycleStartAt: new Date()
-                }
-            });
+           goal = await prisma.goal.create({
+    data: {
+        userId: req.user.id,  // ✅ Hardcoded 11 ki jagah actual user ID
+        title: "Weekly Workout Goal",  // ✅ Ye add karo
+        targetValue: 100,
+        currentValue: 0,
+        cycleStartAt: new Date(),
+    }
+})
         }
 
         // ✅ WORKOUT COUNTING HATA DIYA

@@ -24,8 +24,8 @@ const Register = () => {
             const response = await api.post('/auth/register', formData);
             const { token, user } = response.data;
             login(user, token);
-            toast.success('Account created successfully! 🎉');
-            navigate('/dashboard');
+            toast.success('Account created successfully! Welcome aboard! 🎉');
+             navigate('/', { state: { isNewUser: true } });
         } catch (error) {
             toast.error(error.response?.data?.message || 'Registration failed');
         } finally {
