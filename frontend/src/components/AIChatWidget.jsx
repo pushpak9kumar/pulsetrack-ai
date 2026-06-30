@@ -3,18 +3,29 @@ import api from '../services/api';
 
 const AIChatWidget = () => {
     const [isOpen, setIsOpen] = useState(false);
-    const [messages, setMessages] = useState([
-        { sender: 'ai', text: 'Hi! I am PulseTrack AI Coach. Ask me anything about fitness, diet, or workouts! 💪' }
-    ]);
+   const defaultMessages = [
+    { sender: 'ai', text: 'Hi! I am PulseTrack AI Coach. Ask me anything about fitness, diet, or workouts! 💪' }
+];
+
+// LocalStorage se purani chat load karo, agar nahi hai toh default message dikhao
+const [messages, setMessages] = useState(() => {
+    const savedChat = localStorage.getItem('pulsetrack_ai_chat');
+    return savedChat ? JSON.parse(savedChat) : defaultMessages;
+});
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-        const messagesEndRef = useRef(null);
+     const messagesEndRef = useRef(null);
     const chatContainerRef = useRef(null); // ✅ Naya Ref add kiya
 
     // Auto-scroll to bottom
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
+
+    // Jab bhi messages change ho, usko LocalStorage me save kar do
+useEffect(() => {
+    localStorage.setItem('pulsetrack_ai_chat', JSON.stringify(messages));
+}, [messages]);
 
     // ✅ Naya UseEffect: Click Outside to Close
     useEffect(() => {

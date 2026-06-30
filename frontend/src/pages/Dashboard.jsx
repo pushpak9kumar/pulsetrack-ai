@@ -41,7 +41,12 @@ const [goalInput, setGoalInput] = useState('');
 
     // 2. DATA FETCHING FUNCTION
    const fetchWorkouts = async () => {
+     //setLoadingWorkouts(true);
+
     try {
+        // ✅ Temporary delay - 2 second ruk ja taaki skeleton dikhe
+        //await new Promise(resolve => setTimeout(resolve, 2000));
+
         // ✅ Sab workouts fetch karo (stats aur charts ke liye)
         const response = await api.get('/workouts');
         
@@ -641,58 +646,63 @@ const formatInlineMarkdown = (text) => {
     </Link>
 </div>
 
-                {/* Workouts List Section */}
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Your Recent Workouts 🏋️‍♂️</h2>
-                
-                {loadingWorkouts ? (
-                    <div className="flex justify-center py-10">
-                        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>
-                    </div>
-                ) : recentWorkouts.length === 0 ? (
-                    <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-md transition-colors duration-300">
-                        <p className="text-gray-500 dark:text-gray-400 text-base sm:text-lg">No workouts logged yet. Start moving! 🏃‍♂️</p>
-                        <Link to="/log-workout" className="mt-4 inline-block text-blue-600 dark:text-blue-400 font-semibold hover:underline text-sm sm:text-base">
-                            Log your first workout
-                        </Link>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                        {recentWorkouts.map((workout) => (
-                            <div key={workout._id} className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-md hover:shadow-lg transition relative transition-colors duration-300">
-                                
-                                {/* DELETE BUTTON */}
-                                <button
-                                    onClick={() => handleDelete(workout._id)}
-                                    className="absolute top-3 right-3 sm:top-4 sm:right-4 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 p-1.5 sm:p-2 rounded-full transition"
-                                    title="Delete workout"
-                                >
-                                    🗑️
-                                </button>
+{/* Workouts List Section */}
+<h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Your Recent Workouts 🏋️‍♂️</h2>
 
-                                <h3 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 capitalize pr-8">{workout.type}</h3>
-                                <div className="mt-3 sm:mt-4 flex justify-between text-gray-600 dark:text-gray-300 text-sm sm:text-base">
-                                    <span>⏱️ {workout.duration} mins</span>
-                                    <span>🔥 {workout.calories} cal</span>
-                                </div>
-                                {workout.notes && (
-                                    <p className="mt-3 sm:mt-4 text-xs sm:text-sm text-gray-500 dark:text-gray-400 italic">"{workout.notes}"</p>
-                                )}
-                                <p className="mt-3 sm:mt-4 text-xs text-gray-400 dark:text-gray-500">
-                                    {new Date(workout.createdAt).toLocaleDateString()}
-                                </p>
-
-                                {/* AI FEEDBACK BUTTON */}
-                                <button
-                                    onClick={() => handleGetAIFeedback(workout)}
-                                    className="mt-3 sm:mt-4 w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 rounded-lg font-semibold hover:shadow-lg transition transform hover:scale-105 flex items-center justify-center gap-2 text-sm sm:text-base"
-                                >
-                                    🤖 Get AI Feedback   
-                                </button>
-                            </div>
-                        ))}
-                    </div>
+{/* ✅ YE HAI SKELETON LOADER SECTION */}
+{loadingWorkouts ? (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md animate-pulse border border-gray-200 dark:border-gray-700">
+                <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded w-1/2 mb-4"></div>
+                <div className="flex justify-between mb-4">
+                    <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/4"></div>
+                    <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/4"></div>
+                </div>
+                <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-3/4 mb-3"></div>
+                <div className="h-10 bg-gray-300 dark:bg-gray-600 rounded w-full mt-4"></div>
+            </div>
+        ))}
+    </div>
+) : workouts.length === 0 ? (
+    <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-md transition-colors duration-300">
+        <p className="text-gray-500 dark:text-gray-400 text-base sm:text-lg">No workouts logged yet. Start moving! 🏃‍♂️</p>
+        <Link to="/log-workout" className="mt-4 inline-block text-blue-600 dark:text-blue-400 font-semibold hover:underline text-sm sm:text-base">
+            Log your first workout
+        </Link>
+    </div>
+) : (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        {workouts.map((workout) => (
+            <div key={workout._id} className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-md hover:shadow-lg transition relative transition-colors duration-300">
+                <button
+                    onClick={() => handleDelete(workout._id)}
+                    className="absolute top-3 right-3 sm:top-4 sm:right-4 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 p-1.5 sm:p-2 rounded-full transition"
+                    title="Delete workout"
+                >
+                    🗑️
+                </button>
+                <h3 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 capitalize pr-8">{workout.type}</h3>
+                <div className="mt-3 sm:mt-4 flex justify-between text-gray-600 dark:text-gray-300 text-sm sm:text-base">
+                    <span>⏱️ {workout.duration} mins</span>
+                    <span>🔥 {workout.calories} cal</span>
+                </div>
+                {workout.notes && (
+                    <p className="mt-3 sm:mt-4 text-xs sm:text-sm text-gray-500 dark:text-gray-400 italic">"{workout.notes}"</p>
                 )}
-
+                <p className="mt-3 sm:mt-4 text-xs text-gray-400 dark:text-gray-500">
+                    {new Date(workout.createdAt).toLocaleDateString()}
+                </p>
+                <button
+                    onClick={() => handleGetAIFeedback(workout)}
+                    className="mt-3 sm:mt-4 w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 rounded-lg font-semibold hover:shadow-lg transition transform hover:scale-105 flex items-center justify-center gap-2 text-sm sm:text-base"
+                >
+                    🤖 Get AI Feedback   
+                </button>
+            </div>
+        ))}
+    </div>
+)}
             </div>
             
            {/* AI FEEDBACK MODAL */}
