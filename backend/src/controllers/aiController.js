@@ -1,4 +1,5 @@
-const { getWorkoutFeedback } = require('../services/aiService');
+const { getWorkoutFeedback, getCoachResponse } = require('../services/aiService');
+
 const Workout = require('../models/Workout');
 const prisma = require('../config/sqlConfig');
 
@@ -78,4 +79,68 @@ const getAICoachFeedback = async (req, res) => {
     }
 };
 
-module.exports = { getAICoachFeedback };
+// AI General Chat Controller
+const chatWithAI = async (req, res) => {
+    try {
+        const { message } = req.body;
+        const userId = req.user.id;
+
+        if (!message) {
+            return res.status(400).json({ message: 'Message is required' });
+        }
+
+        // ✅ 1. USER INFO (Prisma se)
+        const user = await prisma.user.findUnique({
+            where: { id: Number(userId) },
+            select: { 
+                level: true, 
+                xp: true,
+                name: true 
+            }
+        });
+
+        // ✅ 2. RECENT WORKOUTS (MongoDB se - Last 5)
+        const recentWorkouts = await Workout.find({ userId })
+            .sort({ date: -1 })
+            .limit(5)
+            .select('type duration calorieBurned date');
+
+        // ✅ 3. CURRENT GOAL (Prisma se)
+        const currentGoal = await prisma.goal.findFirst({
+            where: { userId: Number(userId) },
+            select: { targetValue: true, currentValue: true }
+        });
+
+        // ✅ 4. CONTEXT BANAO
+        const userContext = {
+            name: user?.name || 'User',
+            level: user?.level || 1,
+            totalXP: user?.xp || 0,
+            recentWorkouts: recentWorkouts.map(w => ({
+                type: w.type,
+                duration: w.duration,
+                calories: w.calorieBurned || 0,
+                date: new Date(w.date).toLocaleDateString()
+            })),
+            currentGoal: currentGoal ? {
+                target: currentGoal.targetValue,
+                progress: `${currentGoal.currentValue}/${currentGoal.targetValue} mins`
+            } : null
+        };
+
+        // ✅ 5. AI KO CONTEXT KE SAATH CALL KARO
+        const aiReply = await getCoachResponse(message, userContext);
+
+        res.status(200).json({ reply: aiReply });
+    } catch (error) {
+        console.error('AI Coach Chat error:', error);
+        res.status(500).json({ 
+            message: 'Failed to get AI response', 
+            reply: "Sorry, I'm having trouble connecting. Please try again! 🙏" 
+        });
+    }
+};
+
+module.exports = { getAICoachFeedback,
+                    chatWithAI
+ };

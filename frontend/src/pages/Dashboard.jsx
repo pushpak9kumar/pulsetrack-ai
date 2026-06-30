@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line } from 'recharts';
+import AIChatWidget from '../components/AIChatWidget';
 
 const Dashboard = () => {
     const { user } = useAuth();
@@ -425,33 +426,36 @@ const formatInlineMarkdown = (text) => {
     </form>
 
     {/* Goal History Dropdown */}
-    {showGoalHistory && (
-        <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
-            <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center gap-2">
-                📜 Recent Goals (Last 10)
-            </h3>
-            {goalHistory.length === 0 ? (
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center py-2">
-                    No completed goals yet. Keep working! 💪
-                </p>
-            ) : (
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {goalHistory.map((goal, index) => (
-                        <div key={goal.id} className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded text-xs sm:text-sm">
-                            <span className="text-gray-700 dark:text-gray-200 font-medium">
-                                {goal.targetValue} mins
-                            </span>
-                            <span className="text-gray-500 dark:text-gray-400">
-                                {new Date(goal.completedAt).toLocaleDateString()}
-                            </span>
-                        </div>
-                    ))}
-                </div>
-            )}
-        </div>
-    )}
+{showGoalHistory && (
+    <div 
+        onClick={() => setShowGoalHistory(false)} 
+        className="mt-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+    >
+        <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center gap-2">
+            📜 Recent Goals (Last 10)
+        </h3>
+        {goalHistory.length === 0 ? (
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center py-2">
+                No completed goals yet. Keep working! 💪
+            </p>
+        ) : (
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+                {goalHistory.map((goal, index) => (
+                    <div key={goal.id} className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded text-xs sm:text-sm">
+                        <span className="text-gray-700 dark:text-gray-200 font-medium">
+                            {goal.targetValue} mins
+                        </span>
+                        <span className="text-gray-500 dark:text-gray-400">
+                            {new Date(goal.completedAt).toLocaleDateString()}
+                        </span>
+                    </div>
+                ))}
+            </div>
+        )}
+        <p className="text-[10px] text-gray-400 text-center mt-2 italic">Click anywhere to close</p>
+    </div>
+)}
 </div>
-
                 {/* CHARTS SECTION */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-8 sm:mb-10">
                     
@@ -759,9 +763,12 @@ const formatInlineMarkdown = (text) => {
                     Close
                 </button>
             </div>
+
         </div>
     </div>
 )}
+     {/* AI Chat Widget */}
+               <AIChatWidget />
         </div>
     );
 };
