@@ -8,12 +8,32 @@ const AIChatWidget = () => {
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const messagesEndRef = useRef(null);
+        const messagesEndRef = useRef(null);
+    const chatContainerRef = useRef(null); // ✅ Naya Ref add kiya
 
     // Auto-scroll to bottom
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
+
+    // ✅ Naya UseEffect: Click Outside to Close
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            // Agar click chat container ke bahar hua hai, toh close kar do
+            if (chatContainerRef.current && !chatContainerRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+
+        // Sirf tab event listener add karo jab chat open ho
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isOpen]); // isOpen dependency zaroori hai
 
     const handleSend = async () => {
         if (!input.trim() || isLoading) return;
@@ -50,7 +70,9 @@ const AIChatWidget = () => {
         <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
             {/* Chat Window */}
             {isOpen && (
-                <div className="mb-4 w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col transition-all duration-300" style={{ height: '500px' }}>
+                <div 
+                     ref={chatContainerRef}
+                     className="mb-4 w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col transition-all duration-300" style={{ height: '500px' }}>
                     
                     {/* Header */}
                     <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 flex justify-between items-center text-white">
