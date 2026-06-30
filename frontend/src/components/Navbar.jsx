@@ -46,7 +46,6 @@ const Navbar = () => {
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [goalHistory, setGoalHistory] = useState([]);
     const [userWorkouts, setUserWorkouts] = useState([]);
     const dropdownRef = useRef(null);
     const mobileMenuRef = useRef(null);
@@ -71,21 +70,6 @@ const Navbar = () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
-
-    useEffect(() => {
-        const fetchGoalHistory = async () => {
-            if (isAuthenticated) {
-                try {
-                    const response = await api.get('/users/goal/history');
-                    setGoalHistory(response.data);
-                } catch (error) {
-                    console.error('Failed to fetch goal history:', error);
-                }
-            }
-        };
-        
-        fetchGoalHistory();
-    }, [isAuthenticated]);
 
     useEffect(() => {
         const fetchWorkouts = async () => {
@@ -207,24 +191,6 @@ const Navbar = () => {
                                                 </div>
                                             </div>
                                         </div>
-
-                                        {goalHistory.length > 0 && (
-                                            <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
-                                                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">🏆 Goal History</p>
-                                                <div className="space-y-1 max-h-32 overflow-y-auto">
-                                                    {goalHistory.slice(0, 5).map((goal, index) => (
-                                                        <div key={goal.id} className="flex items-center justify-between text-xs">
-                                                            <span className="text-gray-600 dark:text-gray-300">
-                                                                {goal.targetValue} mins
-                                                            </span>
-                                                            <span className="text-gray-400 dark:text-gray-500">
-                                                                {new Date(goal.completedAt).toLocaleDateString()}
-                                                            </span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
                                         
                                         <div className="py-1">
                                             <button 
