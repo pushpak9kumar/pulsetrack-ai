@@ -1,7 +1,7 @@
 const Workout = require('../models/Workout');
 const { calculateXP, calculateLevel } = require('../services/xpService');
 const { saveGoalToHistoryAndReset } = require('./userController'); 
-
+const prisma = require('../config/sqlConfig');
 //===========================create workout ===========
 const createWorkout = async (req, res) => {
     try {
