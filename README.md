@@ -44,6 +44,7 @@ This project follows a clean, modular architecture with a clear separation of co
 - **Express.js:** Fast, unopinionated web framework for building RESTful APIs
 - **MongoDB & Mongoose:** NoSQL database for workouts and user profiles (flexible schema)
 - **PostgreSQL & Prisma ORM:** Relational database for goals, goal history, and structured user stats
+**Multer**: Middleware for handling `multipart/form-data`, used for secure profile photo uploads
 - **JWT (JSON Web Tokens):** Secure authentication and authorization
 - **Groq SDK:** Integration with Groq API for ultra-fast AI inference
 - **dotenv:** Environment variable management
